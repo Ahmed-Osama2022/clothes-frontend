@@ -20,8 +20,18 @@ onMounted(() => {
     // overflows from translateX offsets. Desktop keeps the animations.
     disable: () => window.innerWidth < 768,
   })
-  onRouterChange = () => AOS.refresh()
-  router.afterEach(onRouterChange)
+  // ======= FIRST-LOAD SAFETY NET =======
+  // HomeView (and every data-aos section inside it) mounts through the
+  // async router-view — which can complete AFTER AOS.init above. Once the
+  // router has resolved the initial navigation, force AOS to re-scan and
+  // reveal everything that is currently in view. Without this, sections that
+  // mounted late keep [data-aos] + opacity:0 (from the AOS package CSS) and
+  // the first load shows a white page.
+  router.isReady().then(() => {
+    AOS.refreshHard()
+    onRouterChange = () => AOS.refresh()
+    router.afterEach(onRouterChange)
+  })
 })
 
 onUnmounted(() => {
@@ -44,3 +54,20 @@ onUnmounted(() => {
     <ToastContainer />
   </div>
 </template>
+
+<style>
+/* ======= AOS MOBILE SAFETY NET =======
+   Below md (768px) AOS is disabled in AOS.init (see script block), which means
+   it only strips data-aos attributes from elements that existed at init time.
+   First-load async sections that mount later keep their data-aos attribute and
+   the AOS package CSS would hold them at opacity:0 forever. This override is
+   THE guarantee that small screens never show hidden content: force every
+   data-aos element visible (no transform/opacity hiding) on <768px. Above that
+   (tablets/desktop) AOS is active and handles reveal through its own logic. */
+@media (max-width: 767.98px) {
+  [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+</style>
