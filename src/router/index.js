@@ -22,6 +22,12 @@ const router = createRouter({
       name: 'testcard',
       component: TestCard,
     },
+    // Category listing pages, e.g. /category/best-sellers
+    {
+      path: '/category/:slug',
+      name: 'category',
+      component: () => import('../views/CategoryView.vue'),
+    },
     // For errro 404
     {
       path: '/:catchAll(.*)',

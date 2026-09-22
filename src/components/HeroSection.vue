@@ -14,6 +14,7 @@ const slides = [
     price: 'From $49.90',
     discount: '20%',
     pill: 'Just in',
+    category: 'signature-collection',
   },
   {
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=900',
@@ -25,6 +26,7 @@ const slides = [
     price: 'From $19.99',
     discount: '50%',
     pill: 'Limited',
+    category: 'mid-season-sale',
   },
   {
     image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&q=80&w=900',
@@ -36,6 +38,7 @@ const slides = [
     price: 'From $29.00',
     discount: '15%',
     pill: 'Trending',
+    category: 'best-sellers',
   },
 ];
 
@@ -72,7 +75,8 @@ onUnmounted(stop);
        Text, prices and images of each slide live in the `slides` array in <script setup>.
        - To change the rotating order/speed: edit `setInterval(next, 7000)` in <script setup>
        - To add/remove slides: add/remove objects in `slides`
-       - CTA buttons below link to /shop and /about (add those routes in src/router/index.js) -->
+       - CTA 'Shop Now' links to /category/{slug} (slug from each slide's `category` field)
+       - routes live in src/router/index.js -->
   <section class="relative overflow-hidden bg-snow-100 text-center md:text-start">
     <div
       class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary-200/50 blur-3xl"
@@ -105,7 +109,7 @@ onUnmounted(stop);
             <!-- === CTA buttons === -->
             <div class="flex flex-wrap items-center gap-4 pt-2 justify-center md:justify-start">
               <router-link
-                to="/shop"
+                :to="`/category/${slides[current].category}`"
                 class="rounded-md bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-primary-600/20 transition hover:-translate-y-0.5 hover:bg-primary-700"
               >
                 Shop Now
