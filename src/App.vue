@@ -13,6 +13,11 @@ onMounted(() => {
     duration: 800,
     easing: 'ease-out-cubic',
     offset: 80,
+    // ======= RESPONSIVE SAFETY =======
+    // Disable AOS below md (768px): on small screens animations are
+    // skipped so elements never sit at opacity:0 and the layout never
+    // overflows from translateX offsets. Desktop keeps the animations.
+    disable: () => window.innerWidth < 768,
   })
   onRouterChange = () => AOS.refresh()
   router.afterEach(onRouterChange)

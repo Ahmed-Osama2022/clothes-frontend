@@ -4,7 +4,7 @@
        Replace image, titles, price and swatch colors below as needed. -->
   <main class="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-snow-100 p-8">
     <div class="space-y-8">
-      <div class="mx-auto w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-md">
+      <div class="mx-auto w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-md" data-aos="fade-up">
         <div class="relative">
           <img
             src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=900"
@@ -44,7 +44,11 @@
         </div>
       </div>
 
-      <div class="mx-auto flex max-w-sm items-center justify-between rounded-lg bg-ink-900 px-6 py-4 text-snow-100">
+      <div
+        class="mx-auto flex max-w-sm items-center justify-between rounded-lg bg-ink-900 px-6 py-4 text-snow-100"
+        data-aos="fade-up"
+        data-aos-delay="150"
+      >
         <span class="text-sm">Free shipping on orders</span>
         <span class="text-primary-400">&#9733;</span>
       </div>

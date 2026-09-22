@@ -10,6 +10,10 @@ Vue 3 + Vite + Tailwind CSS v3 clothes shop frontend.
   2. `<template>`
   3. `<style scoped>` (last, only if needed)
 - **Add developer comments** inside every `<template>` block of new/existing components and views so the developer can easily edit things later (e.g. what to edit, which routes exist, where slider data lives). Mark each with `=======` so they are easy to spot.
+- **Use the AOS library as much as possible** for scroll/entrance animations (`data-aos` attributes). BUT be aware of responsive/re-mount pitfalls:
+  - Never put `data-aos` on Vue-`<transition>`/keyed blocks (carousel slides, filter grids) — those re-mount, AOS would leave them stuck at `opacity:0`. Use Vue `<transition>` for those.
+  - `AOS.init` in `src/App.vue` disables AOS below `md` (768px) so mobile never shows hidden content — keep that.
+  - Keep `once: true` and only animate persistent, static sections.
 - **Do NOT write custom CSS in `src/assets/main.css` or any global CSS file** — it stays as only the three `@tailwind` directives. Use Tailwind utility classes. Per-component animation/transition styles may go in a `<style scoped>` block. AOS CSS comes from the package import.
 - **Theme colors** are defined in `tailwind.config.js` and used everywhere via utilities:
   - `primary` (purple scale, main accent)

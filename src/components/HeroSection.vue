@@ -77,7 +77,7 @@ onUnmounted(stop);
        - To add/remove slides: add/remove objects in `slides`
        - CTA 'Shop Now' links to /category/{slug} (slug from each slide's `category` field)
        - routes live in src/router/index.js -->
-  <section class="relative overflow-hidden bg-snow-100 text-center md:text-start">
+  <section class="relative overflow-hidden bg-snow-100 text-center md:text-start" data-aos="fade-up">
     <div
       class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary-200/50 blur-3xl"
     ></div>
