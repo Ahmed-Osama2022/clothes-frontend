@@ -1,8 +1,9 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCartStore } from '../stores/cart';
 import { useToastStore } from '../stores/toast';
+import { getHomeData } from '../api/home';
 
 const isOpen = ref(false);
 const isCartOpen = ref(false);
@@ -11,13 +12,32 @@ const cart = useCartStore();
 const toast = useToastStore();
 
 // ======= MOBILE MENU LINKS =======
-// Add/remove links for the hamburger menu on small screens here.
+// Static links for the hamburger menu on small screens. Category links are NOT
+// listed here — they are added dynamically below (fetched from the backend).
 const mobileLinks = [
   { to: '/', label: 'Home' },
   { to: '/shop', label: 'Shop' },
   { to: '/about', label: 'About' },
   { to: '/testcard', label: 'Test Card' },
 ];
+
+// ======= DYNAMIC CATEGORY LINKS (hamburger menu) =======
+// Categories come from the backend (GET /api/home -> data.categories, see
+// src/api/home.js + apis.md). Fake data is served for now; swap src/api/home.js
+// for the real client when the Laravel API is up — no changes needed here.
+const categories = ref([]);
+const isCategoriesLoading = ref(true);
+
+onMounted(async () => {
+  try {
+    const { data } = await getHomeData();
+    categories.value = data.categories;
+  } catch {
+    categories.value = []; // menu still works if the call fails
+  } finally {
+    isCategoriesLoading.value = false;
+  }
+});
 
 // Close the mobile menu + cart panel on every route change.
 watch(
@@ -283,6 +303,30 @@ const checkout = () => {
           >
             {{ link.label }}
           </RouterLink>
+
+          <!-- ======= DYNAMIC CATEGORY LINKS =======
+               Rendered from `categories` ref populated on mount via
+               src/api/home.js (fake backend data today). Remove the divider +
+               heading if the menu feels busy, or keep them to separate pages
+               from shop categories. -->
+          <div class="mt-2 border-t border-ink-100 pt-3">
+            <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-ink-400">Categories</p>
+            <p v-if="isCategoriesLoading" class="px-3 py-2.5 text-sm text-ink-400">Loading categories…</p>
+            <RouterLink
+              v-for="cat in categories"
+              :key="cat.slug"
+              :to="cat.url"
+              class="block rounded-md px-3 py-2.5 text-sm font-medium text-ink-500 transition hover:bg-primary-50 hover:text-primary-600"
+              active-class="bg-primary-50 text-primary-600 font-semibold"
+              exact-active-class="bg-primary-50 text-primary-600 font-semibold"
+              @click="isOpen = false"
+            >
+              <span class="flex items-center justify-between">
+                <span>{{ cat.title }}</span>
+                <span class="text-xs text-ink-400">{{ cat.eyebrow }}</span>
+              </span>
+            </RouterLink>
+          </div>
 
           <div class="mt-3 flex gap-3 border-t border-ink-100 pt-4">
             <RouterLink
