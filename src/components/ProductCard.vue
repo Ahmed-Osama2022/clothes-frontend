@@ -40,7 +40,7 @@ const openProduct = () => router.push({ name: 'product', params: { id: props.pro
         :src="product.image"
         :alt="product.name"
         loading="lazy"
-        class="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        class="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105 md:aspect-[4/5]"
       />
       <span
         v-if="badge"

@@ -40,7 +40,7 @@ const openCategory = (slug) => router.push(`/category/${slug}`);
           :src="cat.image"
           :alt="cat.title"
           loading="lazy"
-          class="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105 md:aspect-[3/4]"
+          class="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105 md:aspect-[3/4]"
         />
         <div class="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-ink-950/20 to-transparent"></div>
         <div class="absolute inset-x-0 bottom-0 p-6">
