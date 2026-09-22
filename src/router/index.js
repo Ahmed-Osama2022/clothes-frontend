@@ -22,6 +22,12 @@ const router = createRouter({
       name: 'testcard',
       component: TestCard,
     },
+    // Full catalog / shop page
+    {
+      path: '/shop',
+      name: 'shop',
+      component: () => import('../views/ShopView.vue'),
+    },
     // Category listing pages, e.g. /category/best-sellers
     {
       path: '/category/:slug',

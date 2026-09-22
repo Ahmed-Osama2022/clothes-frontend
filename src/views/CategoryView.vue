@@ -1,49 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-
-// ======= CATEGORY DATA =======
-// Keyed by slug. Add new categories here and link to them via /category/{slug}.
-const categories = {
-  'signature-collection': {
-    title: 'Signature Collection',
-    eyebrow: 'New Season 2026',
-    description: 'Curated everyday pieces — effortless, versatile and made to move with you.',
-    image:
-      'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=1600',
-  },
-  'mid-season-sale': {
-    title: 'Mid-Season Sale',
-    eyebrow: 'Up to 50% Off',
-    description: 'Seasonal favorites at unbeatable prices. Stock up before the sale ends.',
-    image:
-      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600',
-  },
-  'best-sellers': {
-    title: 'Best Sellers',
-    eyebrow: 'New Arrivals',
-    description: 'Everyone is wearing these right now — sustainably made, seriously comfortable.',
-    image:
-      'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&q=80&w=1600',
-  },
-};
-
-// ======= PRODUCTS =======
-// Add/edit the shop items shown in the category grid. `category` must match a key above.
-const products = [
-  { name: 'Classic White Tee', price: 24.99, category: 'signature-collection', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Essential Crewneck', price: 34.99, category: 'signature-collection', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Street Co-ord', price: 59.99, category: 'signature-collection', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Summer Linen Shirt', price: 39.99, category: 'signature-collection', image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Rack Clearance Tee', price: 9.99, category: 'mid-season-sale', image: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Denim Day Fit', price: 44.99, category: 'mid-season-sale', image: 'https://images.unsplash.com/photo-1543087903-1ac2ec7aa8c5?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Weekend Overshirt', price: 29.99, category: 'mid-season-sale', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Hanger Stack Tee', price: 12.99, category: 'mid-season-sale', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Hanging Everyday Set', price: 74.99, category: 'best-sellers', image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Runway Model Top', price: 49.99, category: 'best-sellers', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Boutique Blazer', price: 89.99, category: 'best-sellers', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Studio Top', price: 32.99, category: 'best-sellers', image: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&q=80&w=800' },
-];
+import { categories, products } from '../data/catalog';
 
 const route = useRoute();
 const slug = computed(() => route.params.slug);
@@ -54,15 +12,15 @@ const items = computed(() => products.filter((p) => p.category === slug.value));
 <template>
   <!-- ======= CATEGORY PAGE ========
        Rendered at /category/:slug (route defined in src/router/index.js).
-       - Edit category info + products in the arrays inside <script setup>.
-       - Unknown slugs fall back to the 404 view. -->
+       - Category info + products now live in src/data/catalog.js — edit them there.
+       - Unknown slugs fall back to the 404 catch-all. -->
   <main>
     <section class="relative overflow-hidden">
       <img
         v-if="category"
         :src="category.image"
         :alt="category.title"
-        class="ease-[cubic-bezier(0.22,1,0.36,1)] h-[320px] w-full object-cover transition-transform duration-700 hover:scale-105"
+        class="h-[320px] w-full object-cover transition-transform duration-700 ease-out hover:scale-105"
       />
       <div class="absolute inset-0 bg-ink-950/50"></div>
       <div class="absolute inset-0 flex items-center">
@@ -85,10 +43,7 @@ const items = computed(() => products.filter((p) => p.category === slug.value));
         <p class="text-sm text-ink-400">Free shipping over $50</p>
       </div>
 
-      <div
-        v-if="items.length"
-        class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
-      >
+      <div v-if="items.length" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <article
           v-for="product in items"
           :key="product.name"

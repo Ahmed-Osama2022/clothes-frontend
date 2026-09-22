@@ -115,7 +115,7 @@ onUnmounted(stop);
                 Shop Now
               </router-link>
               <router-link
-                to="/about"
+                to="/shop"
                 class="rounded-md border border-ink-200 bg-white px-6 py-3 text-sm font-semibold text-ink-700 transition hover:-translate-y-0.5 hover:border-primary-400 hover:text-primary-600"
               >
                 Explore Collection
