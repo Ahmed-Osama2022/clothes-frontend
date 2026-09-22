@@ -34,6 +34,17 @@ const router = createRouter({
       name: 'category',
       component: () => import('../views/CategoryView.vue'),
     },
+    // Auth pages (realtime validation + toasts, Sanctum-ready)
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue'),
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/RegisterView.vue'),
+    },
     // For errro 404
     {
       path: '/:catchAll(.*)',

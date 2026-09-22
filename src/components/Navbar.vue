@@ -1,7 +1,14 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useCartStore } from '../stores/cart'
+import { useToastStore } from '../stores/toast'
 
 const isOpen = ref(false)
+const isCartOpen = ref(false)
+const route = useRoute()
+const cart = useCartStore()
+const toast = useToastStore()
 
 // ======= MOBILE MENU LINKS =======
 // Add/remove links for the hamburger menu on small screens here.
@@ -11,6 +18,25 @@ const mobileLinks = [
   { to: '/about', label: 'About' },
   { to: '/testcard', label: 'Test Card' },
 ]
+
+// Close the mobile menu + cart panel on every route change.
+watch(
+  () => route.path,
+  () => {
+    isOpen.value = false
+    isCartOpen.value = false
+  }
+)
+
+const setQty = (id, delta) => {
+  const item = cart.items.find((i) => i.id === id)
+  if (item) cart.setQty(id, item.qty + delta)
+}
+
+const checkout = () => {
+  isCartOpen.value = false
+  toast.info('Checkout is coming soon')
+}
 </script>
 
 <template>
@@ -39,8 +65,7 @@ const mobileLinks = [
         <div class="md:flex md:items-center md:gap-12">
           <nav aria-label="Global" class="hidden md:block">
             <!-- ======= DESKTOP NAV LINKS =======
-                 Edit the links/routes and their labels here.
-                 The 'Shop' route does not exist yet - create it in src/router/index.js -->
+                 Edit the links/routes and their labels here. -->
             <ul class="flex items-center gap-6 text-sm">
               <li>
                 <RouterLink
@@ -82,57 +107,148 @@ const mobileLinks = [
             </ul>
           </nav>
 
-          <div class="flex items-center gap-4">
+          <div class="relative flex items-center gap-3">
             <!-- ======= CTA BUTTONS (Login / Register) =======
-                 Routes /login and /register do not exist yet -->
-            <div class="hidden sm:flex sm:gap-4 md:flex">
+                 Routes /login and /register exist now (src/views/). -->
+            <div class="hidden sm:flex sm:gap-2 md:flex">
               <RouterLink
                 to="/login"
-                class="rounded-md bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary-700"
+                class="inline-flex items-center gap-2 rounded-md bg-primary-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary-700"
               >
+                <i class="pi pi-sign-in" aria-hidden="true"></i>
                 Login
               </RouterLink>
 
               <RouterLink
                 to="/register"
-                class="hidden rounded-md bg-ink-100 px-5 py-2.5 text-sm font-medium text-primary-600 transition hover:bg-ink-200 sm:block"
+                class="hidden inline-flex items-center gap-2 rounded-md bg-ink-100 px-4 py-2.5 text-sm font-medium text-primary-600 transition hover:bg-ink-200 sm:inline-flex"
               >
+                <i class="pi pi-user-plus" aria-hidden="true"></i>
                 Register
               </RouterLink>
             </div>
 
+            <!-- ======= CART BUTTON + BADGE =======
+                 Count comes from the cart store (marked up under badge). -->
+            <button
+              type="button"
+              aria-label="Open your cart"
+              class="relative rounded-sm bg-ink-100 p-2.5 text-ink-600 transition hover:text-ink-700"
+              @click="isCartOpen = !isCartOpen"
+            >
+              <i class="pi pi-shopping-cart text-sm" aria-hidden="true"></i>
+              <span
+                v-if="cart.count"
+                class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-600 px-1 text-[10px] font-bold text-white"
+              >
+                {{ cart.count }}
+              </span>
+            </button>
+
             <button
               type="button"
               aria-label="Toggle menu"
-              aria-expanded="isOpen"
-              class="rounded-sm bg-ink-100 p-2 text-ink-600 transition hover:text-ink-700 md:hidden"
+              :aria-expanded="isOpen"
+              class="rounded-sm bg-ink-100 p-2.5 text-ink-600 transition hover:text-ink-700 md:hidden"
               @click="isOpen = !isOpen"
             >
-              <svg
-                v-if="!isOpen"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                class="size-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              <svg
-                v-else
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                class="size-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
+              <i class="pi text-sm" :class="isOpen ? 'pi-times' : 'pi-bars'" aria-hidden="true"></i>
             </button>
+
+            <!-- ======= CART DROPDOWN PANEL =======
+                 Shows cart lines with qty steppers + total. Uses a Vue transition
+                 (re-keyed block — never data-aos here). -->
+            <transition name="cart-panel">
+              <div
+                v-if="isCartOpen"
+                class="absolute right-0 top-[4.2rem] z-50 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-xl"
+              >
+                <div class="flex items-center justify-between border-b border-ink-100 px-4 py-3">
+                  <p class="text-sm font-semibold text-ink-900">
+                    Your Cart
+                    <span v-if="cart.count" class="ml-1 text-ink-400">({{ cart.count }})</span>
+                  </p>
+                  <button
+                    type="button"
+                    aria-label="Close cart"
+                    class="rounded-md p-1 text-ink-400 transition hover:text-ink-700"
+                    @click="isCartOpen = false"
+                  >
+                    <i class="pi pi-times text-sm" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                <ul v-if="cart.items.length" class="max-h-72 overflow-y-auto divide-y divide-ink-100">
+                  <li v-for="item in cart.items" :key="item.id" class="flex gap-3 p-3">
+                    <img
+                      :src="item.image"
+                      :alt="item.name"
+                      class="h-16 w-12 shrink-0 rounded-lg object-cover"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between gap-2">
+                        <p class="truncate text-sm font-medium text-ink-900">{{ item.name }}</p>
+                        <button
+                          type="button"
+                          aria-label="Remove item"
+                          class="rounded-md p-0.5 text-ink-400 transition hover:text-rose-500"
+                          @click="cart.remove(item.id)"
+                        >
+                          <i class="pi pi-times text-xs" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                      <p class="mt-0.5 text-xs font-semibold text-primary-600">${{ (item.price * item.qty).toFixed(2) }}</p>
+                      <div class="mt-1.5 flex items-center gap-2">
+                        <button
+                          type="button"
+                          aria-label="Decrease quantity"
+                          class="rounded-md bg-ink-100 p-1 text-ink-600 transition hover:bg-ink-200"
+                          @click="setQty(item.id, -1)"
+                        >
+                          <i class="pi pi-minus text-xs" aria-hidden="true"></i>
+                        </button>
+                        <span class="w-4 text-center text-sm font-medium text-ink-900">{{ item.qty }}</span>
+                        <button
+                          type="button"
+                          aria-label="Increase quantity"
+                          class="rounded-md bg-ink-100 p-1 text-ink-600 transition hover:bg-ink-200"
+                          @click="setQty(item.id, 1)"
+                        >
+                          <i class="pi pi-plus text-xs" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+
+                <div v-else class="px-4 py-10 text-center">
+                  <i class="pi pi-shopping-cart text-3xl text-ink-300" aria-hidden="true"></i>
+                  <p class="mt-3 text-sm text-ink-500">Your cart is empty</p>
+                  <RouterLink
+                    to="/shop"
+                    class="mt-3 inline-block text-sm font-semibold text-primary-600 hover:text-primary-700"
+                    @click="isCartOpen = false"
+                  >
+                    Start shopping
+                  </RouterLink>
+                </div>
+
+                <div v-if="cart.items.length" class="border-t border-ink-100 px-4 py-3">
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-ink-500">Total</span>
+                    <span class="text-base font-bold text-ink-900">${{ cart.total.toFixed(2) }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700"
+                    @click="checkout"
+                  >
+                    <i class="pi pi-check" aria-hidden="true"></i>
+                    Checkout
+                  </button>
+                </div>
+              </div>
+            </transition>
           </div>
         </div>
       </div>
@@ -149,10 +265,7 @@ const mobileLinks = [
       leave-from-class="translate-y-0 opacity-100"
       leave-to-class="-translate-y-2 opacity-0"
     >
-      <div
-        v-if="isOpen"
-        class="lg:hidden"
-      >
+      <div v-if="isOpen" class="lg:hidden">
         <div class="space-y-1 border-t border-ink-100 bg-white px-4 py-4 sm:px-6 lg:px-8">
           <RouterLink
             v-for="link in mobileLinks"
@@ -187,3 +300,23 @@ const mobileLinks = [
     </transition>
   </header>
 </template>
+
+<style scoped>
+.cart-panel-enter-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.cart-panel-leave-active {
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.cart-panel-enter-from,
+.cart-panel-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+</style>

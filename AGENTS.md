@@ -21,4 +21,5 @@ Vue 3 + Vite + Tailwind CSS v3 clothes shop frontend.
   - `snow` (white family)
   Keep using these names instead of Tailwind defaults when the shop palette applies.
 - **Router + Pinia** are wired in `src/main.js`. New pages go in `src/views/`, new store logic in `src/stores/`, new shared components in `src/components/`, routes in `src/router/index.js`.
+- **Backend auth (Laravel + Sanctum)**: token strategy is not localStorage-first — prefer Sanctum SPA cookie auth (`withCredentials: true` + `X-XSRF-TOKEN` header, both already set in `src/api/client.js`). The auth token stays in Laravel's httpOnly cookie; Pinia stores only the reactive `user` object (`src/stores/auth.js`). Bearer tokens are supported as a fallback via `localStorage['auth_token']` but should be avoided for production (XSS-readable). API base URL comes from `.env` (`VITE_API_URL`, falls back to `BASE_URL`/http://localhost:3200).
 - Always verify with Tailwind compile + `node --check` after changes.

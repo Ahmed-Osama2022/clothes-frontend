@@ -3,6 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 import Navbar from './components/Navbar.vue'
+import ToastContainer from './components/ToastContainer.vue'
 import router from './router'
 
 let onRouterChange = null
@@ -38,5 +39,8 @@ onUnmounted(() => {
   <div class="min-h-screen bg-snow-100">
     <Navbar />
     <router-view />
+    <!-- ======= GLOBAL TOASTS =======
+         Renders success/error notifications from stores/toast.js. -->
+    <ToastContainer />
   </div>
 </template>

@@ -1,3 +1,26 @@
+<script setup>
+import { useCartStore } from '../stores/cart';
+import { useToastStore } from '../stores/toast';
+
+// ======= TEST CARD DEMO PRODUCT =======
+// Standalone demo item so /testcard can exercise the cart too.
+const cart = useCartStore();
+const toast = useToastStore();
+
+const demoProduct = {
+  id: 99,
+  name: 'Classic White Tee',
+  price: 24.99,
+  image:
+    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800',
+};
+
+const addToCart = () => {
+  cart.add(demoProduct);
+  toast.success(`${demoProduct.name} added to cart`);
+};
+</script>
+
 <template>
   <!-- ======= TEST PRODUCT CARD =======
        A demo product card to preview the shop theme (route: /testcard).
@@ -37,8 +60,10 @@
           </div>
 
           <button
-            class="mt-5 w-full rounded-lg bg-primary-600 px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700"
+            class="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700"
+            @click="addToCart"
           >
+            <i class="pi pi-cart-plus" aria-hidden="true"></i>
             Add to Cart
           </button>
         </div>

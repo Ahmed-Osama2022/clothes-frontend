@@ -1,6 +1,16 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { categories, products } from '../data/catalog';
+import { useCartStore } from '../stores/cart';
+import { useToastStore } from '../stores/toast';
+
+const cart = useCartStore();
+const toast = useToastStore();
+
+const addToCart = (product) => {
+  cart.add(product);
+  toast.success(`${product.name} added to cart`);
+};
 
 // ======= SHOP PAGE STATE =======
 // Filters by category ('all' shows everything) + sorts the grid.
@@ -102,7 +112,7 @@ const sortedAndFiltered = computed(() => {
         >
           <article
             v-for="product in sortedAndFiltered"
-            :key="product.name"
+            :key="product.id"
             class="group overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
           >
             <div class="relative overflow-hidden">
@@ -114,8 +124,10 @@ const sortedAndFiltered = computed(() => {
               />
               <button
                 type="button"
-                class="absolute inset-x-4 bottom-4 translate-y-12 rounded-lg bg-ink-900/90 py-2.5 text-sm font-semibold text-white opacity-0 transition-all duration-300 hover:bg-primary-600 group-hover:translate-y-0 group-hover:opacity-100"
+                class="absolute inset-x-4 bottom-4 flex items-center justify-center gap-2 translate-y-12 rounded-lg bg-ink-900/90 py-2.5 text-sm font-semibold text-white opacity-0 transition-all duration-300 hover:bg-primary-600 group-hover:translate-y-0 group-hover:opacity-100"
+                @click="addToCart(product)"
               >
+                <i class="pi pi-cart-plus" aria-hidden="true"></i>
                 Add to Cart
               </button>
             </div>
