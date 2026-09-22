@@ -35,6 +35,16 @@ export default {
           200: '#e9eaed',
         },
       },
+      animation: {
+        float: 'float 6s ease-in-out infinite',
+        'float-delayed': 'float 6s ease-in-out 3s infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-14px)' },
+        },
+      },
     },
   },
   plugins: [],

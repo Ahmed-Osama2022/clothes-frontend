@@ -1,27 +1,53 @@
 <template>
-  <div class="min-h-screen bg-snow-100 p-8 font-sans">
-    <div class="mx-auto max-w-sm space-y-4">
-      <div class="rounded-xl bg-white p-6 shadow-md">
-        <p class="text-sm font-semibold uppercase tracking-wide text-primary-500">New Arrivals</p>
-        <h1 class="mt-2 text-2xl font-bold text-ink-900">The Clothes Shop</h1>
-        <p class="mt-2 text-sm text-ink-500">A light black, a pretty purple, and a clean white.</p>
-        <button
-          class="mt-4 w-full rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white transition hover:bg-primary-700"
-        >
-          Shop Now
-        </button>
+  <!-- ======= TEST PRODUCT CARD =======
+       A demo product card to preview the shop theme (route: /testcard).
+       Replace image, titles, price and swatch colors below as needed. -->
+  <main class="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-snow-100 p-8">
+    <div class="space-y-8">
+      <div class="mx-auto w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-md">
+        <div class="relative">
+          <img
+            src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=900"
+            alt="Classic white tee"
+            class="aspect-[4/3] w-full object-cover"
+          />
+          <span
+            class="absolute left-4 top-4 rounded-full bg-primary-600 px-3 py-1 text-xs font-semibold text-white"
+          >
+            -20%
+          </span>
+        </div>
+
+        <div class="p-6">
+          <p class="text-sm font-semibold uppercase tracking-wide text-primary-500">New Arrivals</p>
+          <h1 class="mt-2 text-xl font-bold text-ink-900">Classic White Tee</h1>
+          <p class="mt-2 text-sm text-ink-500">
+            A light black, a pretty purple, and a clean white.
+          </p>
+
+          <div class="mt-4 flex items-center justify-between">
+            <p class="text-lg font-bold text-ink-900">
+              $24.99 <span class="ml-2 text-sm font-medium text-ink-400 line-through">$31.25</span>
+            </p>
+            <div class="flex gap-2">
+              <span class="h-5 w-5 rounded-full bg-white ring-1 ring-ink-200"></span>
+              <span class="h-5 w-5 rounded-full bg-ink-900"></span>
+              <span class="h-5 w-5 rounded-full bg-primary-500"></span>
+            </div>
+          </div>
+
+          <button
+            class="mt-5 w-full rounded-lg bg-primary-600 px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700"
+          >
+            Add to Cart
+          </button>
+        </div>
       </div>
 
-      <div class="flex items-center justify-between rounded-lg bg-ink-900 px-6 py-4 text-snow-100">
+      <div class="mx-auto flex max-w-sm items-center justify-between rounded-lg bg-ink-900 px-6 py-4 text-snow-100">
         <span class="text-sm">Free shipping on orders</span>
         <span class="text-primary-400">&#9733;</span>
       </div>
-
-      <div class="flex justify-center gap-3">
-        <span class="h-6 w-6 rounded-full bg-white ring-1 ring-ink-200"></span>
-        <span class="h-6 w-6 rounded-full bg-ink-900"></span>
-        <span class="h-6 w-6 rounded-full bg-primary-500"></span>
-      </div>
     </div>
-  </div>
+  </main>
 </template>
