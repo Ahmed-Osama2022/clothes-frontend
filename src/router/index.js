@@ -28,6 +28,12 @@ const router = createRouter({
       name: 'shop',
       component: () => import('../views/ShopView.vue'),
     },
+    // Single product detail page, e.g. /product/1
+    {
+      path: '/product/:id',
+      name: 'product',
+      component: () => import('../views/ProductView.vue'),
+    },
     // Category listing pages, e.g. /category/best-sellers
     {
       path: '/category/:slug',

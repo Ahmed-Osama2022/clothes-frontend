@@ -28,6 +28,11 @@ watch(
   },
 );
 
+// Lock background scroll while the full-screen mobile cart is open (< md).
+watch(isCartOpen, (open) => {
+  document.body.style.overflow = open && window.innerWidth < 768 ? 'hidden' : '';
+});
+
 const setQty = (id, delta) => {
   const item = cart.items.find((i) => i.id === id);
   if (item) cart.setQty(id, item.qty + delta);
@@ -155,13 +160,15 @@ const checkout = () => {
               <i class="pi text-sm" :class="isOpen ? 'pi-times' : 'pi-bars'" aria-hidden="true"></i>
             </button>
 
-            <!-- ======= CART DROPDOWN PANEL =======
-                 Shows cart lines with qty steppers + total. Uses a Vue transition
-                 (re-keyed block — never data-aos here). -->
+            <!-- ======= CART SHEET / DROPDOWN =======
+                 Small screens (< md): full-width + full-height sheet that slides
+                 from under the navbar (fixed inset-x-0 top-16 bottom-0).
+                 md and up: compact dropdown anchored to the cart button.
+                 Uses a Vue transition (re-keyed block — never data-aos here). -->
             <transition name="cart-panel">
               <div
                 v-if="isCartOpen"
-                class="absolute right-0 top-[4.2rem] z-50 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-xl"
+                class="fixed inset-x-0 bottom-0 top-16 z-50 flex flex-col overflow-hidden bg-white shadow-xl md:absolute md:inset-auto md:right-0 md:top-[4.2rem] md:z-50 md:w-80 md:max-w-[calc(100vw-2rem)] md:rounded-2xl md:border md:border-ink-100"
               >
                 <div class="flex items-center justify-between border-b border-ink-100 px-4 py-3">
                   <p class="text-sm font-semibold text-ink-900">
@@ -178,7 +185,7 @@ const checkout = () => {
                   </button>
                 </div>
 
-                <ul v-if="cart.items.length" class="max-h-72 overflow-y-auto divide-y divide-ink-100">
+                <ul v-if="cart.items.length" class="flex-1 min-h-0 overflow-y-auto divide-y divide-ink-100 md:max-h-72">
                   <li v-for="item in cart.items" :key="item.id" class="flex gap-3 p-3">
                     <img :src="item.image" :alt="item.name" class="h-16 w-12 shrink-0 rounded-lg object-cover" />
                     <div class="flex-1 min-w-0">
