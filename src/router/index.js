@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
+import TestCard from '../components/TestCard.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,10 +15,15 @@ const router = createRouter({
       name: 'about',
       component: () => import('../views/AboutView.vue'),
     },
+    {
+      path: '/testcard',
+      name: 'testcard',
+      component: TestCard,
+    },
     // For errro 404
     {
       path: '/:catchAll(.*)',
-      component: NotFound;
+      // component: NotFound;
     },
   ],
 });
