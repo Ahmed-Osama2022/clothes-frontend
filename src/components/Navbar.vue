@@ -1,3 +1,18 @@
+<script setup>
+import { ref } from 'vue'
+
+const isOpen = ref(false)
+
+// ======= MOBILE MENU LINKS =======
+// Add/remove links for the hamburger menu on small screens here.
+const mobileLinks = [
+  { to: '/', label: 'Home' },
+  { to: '/shop', label: 'Shop' },
+  { to: '/about', label: 'About' },
+  { to: '/testcard', label: 'Test Card' },
+]
+</script>
+
 <template>
   <header class="sticky top-0 z-40 border-b border-ink-100 bg-white">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -172,18 +187,3 @@
     </transition>
   </header>
 </template>
-
-<script setup>
-import { ref } from 'vue'
-
-const isOpen = ref(false)
-
-// ======= MOBILE MENU LINKS =======
-// Add/remove links for the hamburger menu on small screens here.
-const mobileLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/shop', label: 'Shop' },
-  { to: '/about', label: 'About' },
-  { to: '/testcard', label: 'Test Card' },
-]
-</script>

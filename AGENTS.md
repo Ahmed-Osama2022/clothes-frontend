@@ -5,6 +5,10 @@ Vue 3 + Vite + Tailwind CSS v3 clothes shop frontend.
 ## Rules for this project
 
 - **Never run `npm run build`** for this project. Use `npm run dev`, `node --check`, or `npx tailwindcss -i src/assets/main.css -o /tmp/out.css` to verify.
+- **Single-File Component (`.vue`) block order** — always put the blocks in this order across the whole project:
+  1. `<script setup>` (first, only if the component has logic)
+  2. `<template>`
+  3. `<style scoped>` (last, only if needed)
 - **Add developer comments** inside every `<template>` block of new/existing components and views so the developer can easily edit things later (e.g. what to edit, which routes exist, where slider data lives). Mark each with `=======` so they are easy to spot.
 - **Do NOT write custom CSS in `src/assets/main.css` or any global CSS file** — it stays as only the three `@tailwind` directives. Use Tailwind utility classes. Per-component animation/transition styles may go in a `<style scoped>` block. AOS CSS comes from the package import.
 - **Theme colors** are defined in `tailwind.config.js` and used everywhere via utilities:

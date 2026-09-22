@@ -1,3 +1,8 @@
+<script setup>
+import AnnouncementBanner from '../components/AnnouncementBanner.vue'
+import HeroSection from '../components/HeroSection.vue'
+</script>
+
 <template>
   <main>
     <!-- ======= HOME PAGE SECTIONS =======
@@ -6,8 +11,3 @@
     <HeroSection />
   </main>
 </template>
-
-<script setup>
-import AnnouncementBanner from '../components/AnnouncementBanner.vue'
-import HeroSection from '../components/HeroSection.vue'
-</script>
