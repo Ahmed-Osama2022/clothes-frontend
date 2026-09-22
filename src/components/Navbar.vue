@@ -227,19 +227,19 @@ const checkout = () => {
                         <button
                           type="button"
                           aria-label="Decrease quantity"
-                          class="rounded-md bg-ink-100 p-1 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90"
+                          class="rounded-md bg-ink-100 p-1.5 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90 md:p-2.5"
                           @click="setQty(item.id, -1)"
                         >
-                          <i class="pi pi-minus text-xs" aria-hidden="true"></i>
+                          <i class="pi pi-minus text-xs md:text-base" aria-hidden="true"></i>
                         </button>
-                        <span class="w-4 text-center text-sm font-medium text-ink-900">{{ item.qty }}</span>
+                        <span class="w-6 text-center text-sm font-medium text-ink-900 md:w-8 md:text-base md:font-semibold">{{ item.qty }}</span>
                         <button
                           type="button"
                           aria-label="Increase quantity"
-                          class="rounded-md bg-ink-100 p-1 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90"
+                          class="rounded-md bg-ink-100 p-1.5 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90 md:p-2.5"
                           @click="setQty(item.id, 1)"
                         >
-                          <i class="pi pi-plus text-xs" aria-hidden="true"></i>
+                          <i class="pi pi-plus text-xs md:text-base" aria-hidden="true"></i>
                         </button>
                       </div>
                     </div>
