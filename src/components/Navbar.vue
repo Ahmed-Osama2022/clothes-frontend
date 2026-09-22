@@ -149,7 +149,7 @@ const checkout = () => {
               type="button"
               aria-label="Toggle menu"
               :aria-expanded="isOpen"
-              class="rounded-sm bg-ink-100 p-2.5 text-ink-600 transition hover:text-ink-700 md:hidden"
+              class="rounded-sm bg-ink-100 p-2.5 text-ink-600 transition duration-200 hover:text-ink-700 active:scale-90 md:hidden"
               @click="isOpen = !isOpen"
             >
               <i class="pi text-sm" :class="isOpen ? 'pi-times' : 'pi-bars'" aria-hidden="true"></i>
@@ -171,7 +171,7 @@ const checkout = () => {
                   <button
                     type="button"
                     aria-label="Close cart"
-                    class="rounded-md p-1 text-ink-400 transition hover:text-ink-700"
+                    class="rounded-md p-1 text-ink-400 transition duration-200 hover:text-ink-700 active:scale-90"
                     @click="isCartOpen = false"
                   >
                     <i class="pi pi-times text-sm" aria-hidden="true"></i>
@@ -187,7 +187,7 @@ const checkout = () => {
                         <button
                           type="button"
                           aria-label="Remove item"
-                          class="rounded-md p-0.5 text-ink-400 transition hover:text-rose-500"
+                          class="rounded-md p-0.5 text-ink-400 transition duration-200 hover:text-rose-500 active:scale-90"
                           @click="cart.remove(item.id)"
                         >
                           <i class="pi pi-times text-xs" aria-hidden="true"></i>
@@ -200,7 +200,7 @@ const checkout = () => {
                         <button
                           type="button"
                           aria-label="Decrease quantity"
-                          class="rounded-md bg-ink-100 p-1 text-ink-600 transition hover:bg-ink-200"
+                          class="rounded-md bg-ink-100 p-1 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90"
                           @click="setQty(item.id, -1)"
                         >
                           <i class="pi pi-minus text-xs" aria-hidden="true"></i>
@@ -209,7 +209,7 @@ const checkout = () => {
                         <button
                           type="button"
                           aria-label="Increase quantity"
-                          class="rounded-md bg-ink-100 p-1 text-ink-600 transition hover:bg-ink-200"
+                          class="rounded-md bg-ink-100 p-1 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90"
                           @click="setQty(item.id, 1)"
                         >
                           <i class="pi pi-plus text-xs" aria-hidden="true"></i>
@@ -238,7 +238,7 @@ const checkout = () => {
                   </div>
                   <button
                     type="button"
-                    class="mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700"
+                    class="mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90"
                     @click="checkout"
                   >
                     <i class="pi pi-check" aria-hidden="true"></i>
@@ -280,14 +280,14 @@ const checkout = () => {
           <div class="mt-3 flex gap-3 border-t border-ink-100 pt-4">
             <RouterLink
               to="/login"
-              class="flex-1 rounded-md bg-primary-600 px-4 py-2.5 text-center text-sm font-medium text-white shadow-sm transition hover:bg-primary-700"
+              class="flex-1 rounded-md bg-primary-600 px-4 py-2.5 text-center text-sm font-medium text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90"
               @click="isOpen = false"
             >
               Login
             </RouterLink>
             <RouterLink
               to="/register"
-              class="flex-1 rounded-md bg-ink-100 px-4 py-2.5 text-center text-sm font-medium text-primary-600 transition hover:bg-ink-200"
+              class="flex-1 rounded-md bg-ink-100 px-4 py-2.5 text-center text-sm font-medium text-primary-600 transition duration-200 hover:bg-ink-200 active:scale-90"
               @click="isOpen = false"
             >
               Register

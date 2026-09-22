@@ -70,7 +70,7 @@ const sortedAndFiltered = computed(() => {
             v-for="filter in filters"
             :key="filter.slug"
             type="button"
-            class="rounded-full px-4 py-2 text-sm font-medium transition hover:scale-105 active:scale-95"
+            class="rounded-full px-4 py-2 text-sm font-medium transition duration-200 hover:scale-105 active:scale-90"
             :class="
               active === filter.slug
                 ? 'bg-primary-600 text-white shadow-sm'
@@ -124,7 +124,7 @@ const sortedAndFiltered = computed(() => {
               />
               <button
                 type="button"
-                class="absolute inset-x-4 bottom-4 flex items-center justify-center gap-2 translate-y-12 rounded-lg bg-ink-900/90 py-2.5 text-sm font-semibold text-white opacity-0 transition-all duration-300 hover:bg-primary-600 group-hover:translate-y-0 group-hover:opacity-100"
+                class="absolute inset-x-4 bottom-4 flex items-center justify-center gap-2 translate-y-12 rounded-lg bg-ink-900/90 py-2.5 text-sm font-semibold text-white opacity-0 transition-all duration-200 hover:bg-primary-600 group-hover:translate-y-0 group-hover:opacity-100 active:scale-90"
                 @click="addToCart(product)"
               >
                 <i class="pi pi-cart-plus" aria-hidden="true"></i>

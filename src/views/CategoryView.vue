@@ -68,7 +68,7 @@ const addToCart = (product) => {
             />
             <button
               type="button"
-              class="absolute inset-x-4 bottom-4 flex items-center justify-center gap-2 translate-y-12 rounded-lg bg-ink-900/90 py-2.5 text-sm font-semibold text-white opacity-0 transition-all duration-300 hover:bg-primary-600 group-hover:translate-y-0 group-hover:opacity-100"
+              class="absolute inset-x-4 bottom-4 flex items-center justify-center gap-2 translate-y-12 rounded-lg bg-ink-900/90 py-2.5 text-sm font-semibold text-white opacity-0 transition-all duration-200 hover:bg-primary-600 group-hover:translate-y-0 group-hover:opacity-100 active:scale-90"
               @click="addToCart(product)"
             >
               <i class="pi pi-cart-plus" aria-hidden="true"></i>
@@ -87,7 +87,7 @@ const addToCart = (product) => {
         <h2 class="mt-4 text-xl font-semibold text-ink-900">Category not found</h2>
         <router-link
           to="/"
-          class="mt-6 inline-block rounded-md bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-primary-700"
+          class="mt-6 inline-block rounded-md bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition duration-200 hover:bg-primary-700 active:scale-90"
         >
           Back to Home
         </router-link>

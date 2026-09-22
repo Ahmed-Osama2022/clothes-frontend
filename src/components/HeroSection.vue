@@ -110,13 +110,13 @@ onUnmounted(stop);
             <div class="flex flex-wrap items-center gap-4 pt-2 justify-center md:justify-start">
               <router-link
                 :to="`/category/${slides[current].category}`"
-                class="rounded-md bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-primary-600/20 transition hover:-translate-y-0.5 hover:bg-primary-700"
+                class="rounded-md bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-primary-600/20 transition duration-200 hover:-translate-y-0.5 hover:bg-primary-700 active:scale-90"
               >
                 Shop Now
               </router-link>
               <router-link
                 to="/shop"
-                class="rounded-md border border-ink-200 bg-white px-6 py-3 text-sm font-semibold text-ink-700 transition hover:-translate-y-0.5 hover:border-primary-400 hover:text-primary-600"
+                class="rounded-md border border-ink-200 bg-white px-6 py-3 text-sm font-semibold text-ink-700 transition duration-200 hover:-translate-y-0.5 hover:border-primary-400 hover:text-primary-600 active:scale-90"
               >
                 Explore Collection
               </router-link>
@@ -128,7 +128,7 @@ onUnmounted(stop);
           <button
             type="button"
             aria-label="Previous slide"
-            class="flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-600 transition hover:border-primary-400 hover:text-primary-600"
+            class="flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-600 transition duration-200 hover:border-primary-400 hover:text-primary-600 active:scale-90"
             @click="prev"
           >
             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -142,7 +142,7 @@ onUnmounted(stop);
           <button
             type="button"
             aria-label="Next slide"
-            class="flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-600 transition hover:border-primary-400 hover:text-primary-600"
+            class="flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-600 transition duration-200 hover:border-primary-400 hover:text-primary-600 active:scale-90"
             @click="next"
           >
             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -160,7 +160,7 @@ onUnmounted(stop);
               :key="index"
               type="button"
               :aria-label="`Go to slide ${index + 1}`"
-              class="h-2 rounded-full transition-all"
+              class="h-2 rounded-full transition-all duration-200 active:scale-90"
               :class="index === current ? 'w-8 bg-primary-500' : 'w-2 bg-ink-200 hover:bg-ink-300'"
               @click="goTo(index)"
             ></button>

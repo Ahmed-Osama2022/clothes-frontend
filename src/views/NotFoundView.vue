@@ -11,7 +11,7 @@
       </p>
       <RouterLink
         to="/"
-        class="mt-8 inline-block rounded-md bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary-700"
+        class="mt-8 inline-block rounded-md bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90"
       >
         Back to Home
       </RouterLink>

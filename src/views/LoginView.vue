@@ -113,7 +113,7 @@ const handleSubmit = async () => {
               <button
                 type="button"
                 :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 transition hover:text-ink-600"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 transition duration-200 hover:text-ink-600 active:scale-90"
                 @click="showPassword = !showPassword"
               >
                 <i class="pi text-sm" :class="showPassword ? 'pi-eye-slash' : 'pi-eye'" aria-hidden="true"></i>
@@ -128,7 +128,7 @@ const handleSubmit = async () => {
           <button
             type="submit"
             :disabled="submitting"
-            class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+            class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <i class="pi" :class="submitting ? 'pi-spinner pi-spin' : 'pi-sign-in'" aria-hidden="true"></i>
             {{ submitting ? 'Signing in…' : 'Sign in' }}

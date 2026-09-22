@@ -60,7 +60,7 @@ const addToCart = () => {
           </div>
 
           <button
-            class="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700"
+            class="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 font-semibold text-white transition duration-200 hover:bg-primary-700 active:scale-90"
             @click="addToCart"
           >
             <i class="pi pi-cart-plus" aria-hidden="true"></i>

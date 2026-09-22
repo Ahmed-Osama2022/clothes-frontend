@@ -40,7 +40,7 @@ const iconColorFor = (type) => ({
         <button
           type="button"
           aria-label="Dismiss notification"
-          class="rounded-md p-1 text-lg opacity-60 transition hover:opacity-100"
+          class="rounded-md p-1 text-lg opacity-60 transition duration-200 hover:opacity-100 active:scale-90"
           @click="toast.dismiss(t.id)"
         >
           <i class="pi pi-times" aria-hidden="true"></i>
