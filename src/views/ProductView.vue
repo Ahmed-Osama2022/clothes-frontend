@@ -1,16 +1,15 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { categories, products } from '../data/catalog';
 import { useCartStore } from '../stores/cart';
 import { useToastStore } from '../stores/toast';
+import ProductCard from '../components/ProductCard.vue';
 
 // ======= SINGLE PRODUCT PAGE (route: /product/:id) =======
 // Reads the :id param from the URL and pulls the product from src/data/catalog.js.
-// Unknown ids render the 'not found' state. Cards link here from Shop/Category
-// (and the cart dropdown) via router.push({ name: 'product', params: { id } }).
+// Unknown ids render the 'not found' state.
 const route = useRoute();
-const router = useRouter();
 const cart = useCartStore();
 const toast = useToastStore();
 
@@ -40,8 +39,6 @@ const addToCart = () => {
   toast.success(`${product.value.name} added to cart`);
   qty.value = 1;
 };
-
-const goToProduct = (id) => router.push({ name: 'product', params: { id } });
 
 const features = [
   { icon: 'pi-truck', label: 'Free shipping on orders over $50' },
@@ -163,28 +160,7 @@ const features = [
         </div>
 
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" data-aos="fade-up">
-          <article
-            v-for="item in related"
-            :key="item.id"
-            role="link"
-            tabindex="0"
-            class="group cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg"
-            @click="goToProduct(item.id)"
-            @keydown.enter="goToProduct(item.id)"
-          >
-            <div class="relative overflow-hidden">
-              <img
-                :src="item.image"
-                :alt="item.name"
-                loading="lazy"
-                class="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
-            <div class="p-4">
-              <h3 class="font-semibold text-ink-900">{{ item.name }}</h3>
-              <p class="mt-1 text-sm font-bold text-primary-600">${{ item.price.toFixed(2) }}</p>
-            </div>
-          </article>
+          <ProductCard v-for="item in related" :key="item.id" :product="item" />
         </div>
       </section>
     </template>

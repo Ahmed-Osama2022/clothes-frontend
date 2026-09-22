@@ -1,26 +1,13 @@
 <script setup>
 import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { categories, products } from '../data/catalog';
-import { useCartStore } from '../stores/cart';
-import { useToastStore } from '../stores/toast';
+import ProductCard from '../components/ProductCard.vue';
 
 const route = useRoute();
-const router = useRouter();
 const slug = computed(() => route.params.slug);
 const category = computed(() => categories[slug.value]);
 const items = computed(() => products.filter((p) => p.category === slug.value));
-
-const cart = useCartStore();
-const toast = useToastStore();
-
-const addToCart = (product) => {
-  cart.add(product);
-  toast.success(`${product.name} added to cart`);
-};
-
-// Clicking a card anywhere opens its product page (/product/:id).
-const goToProduct = (id) => router.push({ name: 'product', params: { id } });
 </script>
 
 <template>
@@ -58,36 +45,7 @@ const goToProduct = (id) => router.push({ name: 'product', params: { id } });
       </div>
 
       <div v-if="items.length" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <article
-          v-for="product in items"
-          :key="product.id"
-          role="link"
-          tabindex="0"
-          class="group cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg"
-          @click="goToProduct(product.id)"
-          @keydown.enter="goToProduct(product.id)"
-        >
-          <div class="relative overflow-hidden">
-            <img
-              :src="product.image"
-              :alt="product.name"
-              loading="lazy"
-              class="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <button
-              type="button"
-              class="absolute inset-x-4 bottom-4 flex items-center justify-center gap-2 translate-y-12 rounded-lg bg-ink-900/90 py-2.5 text-sm font-semibold text-white opacity-0 transition-all duration-200 hover:bg-primary-600 group-hover:translate-y-0 group-hover:opacity-100 active:scale-90"
-              @click.stop="addToCart(product)"
-            >
-              <i class="pi pi-cart-plus" aria-hidden="true"></i>
-              Add to Cart
-            </button>
-          </div>
-          <div class="p-4">
-            <h3 class="font-semibold text-ink-900">{{ product.name }}</h3>
-            <p class="mt-1 text-sm font-bold text-primary-600">${{ product.price.toFixed(2) }}</p>
-          </div>
-        </article>
+        <ProductCard v-for="product in items" :key="product.id" :product="product" />
       </div>
 
       <div v-else class="py-20 text-center">
