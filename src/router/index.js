@@ -45,7 +45,7 @@ const router = createRouter({
       name: 'register',
       component: () => import('../views/RegisterView.vue'),
     },
-    // For errro 404
+    // For error page 404
     {
       path: '/:catchAll(.*)',
       name: 'not-found',

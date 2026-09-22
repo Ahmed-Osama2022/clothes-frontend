@@ -1,14 +1,14 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { useCartStore } from '../stores/cart'
-import { useToastStore } from '../stores/toast'
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useCartStore } from '../stores/cart';
+import { useToastStore } from '../stores/toast';
 
-const isOpen = ref(false)
-const isCartOpen = ref(false)
-const route = useRoute()
-const cart = useCartStore()
-const toast = useToastStore()
+const isOpen = ref(false);
+const isCartOpen = ref(false);
+const route = useRoute();
+const cart = useCartStore();
+const toast = useToastStore();
 
 // ======= MOBILE MENU LINKS =======
 // Add/remove links for the hamburger menu on small screens here.
@@ -17,26 +17,26 @@ const mobileLinks = [
   { to: '/shop', label: 'Shop' },
   { to: '/about', label: 'About' },
   { to: '/testcard', label: 'Test Card' },
-]
+];
 
 // Close the mobile menu + cart panel on every route change.
 watch(
   () => route.path,
   () => {
-    isOpen.value = false
-    isCartOpen.value = false
-  }
-)
+    isOpen.value = false;
+    isCartOpen.value = false;
+  },
+);
 
 const setQty = (id, delta) => {
-  const item = cart.items.find((i) => i.id === id)
-  if (item) cart.setQty(id, item.qty + delta)
-}
+  const item = cart.items.find((i) => i.id === id);
+  if (item) cart.setQty(id, item.qty + delta);
+};
 
 const checkout = () => {
-  isCartOpen.value = false
-  toast.info('Checkout is coming soon')
-}
+  isCartOpen.value = false;
+  toast.info('Checkout is coming soon');
+};
 </script>
 
 <template>
@@ -113,7 +113,7 @@ const checkout = () => {
             <div class="hidden sm:flex sm:gap-2 md:flex">
               <RouterLink
                 to="/login"
-                class="inline-flex items-center gap-2 rounded-md bg-primary-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary-700"
+                class="inline-flex items-center gap-2 rounded-md bg-primary-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90"
               >
                 <i class="pi pi-sign-in" aria-hidden="true"></i>
                 Login
@@ -121,7 +121,7 @@ const checkout = () => {
 
               <RouterLink
                 to="/register"
-                class="hidden inline-flex items-center gap-2 rounded-md bg-ink-100 px-4 py-2.5 text-sm font-medium text-primary-600 transition hover:bg-ink-200 sm:inline-flex"
+                class="hidden inline-flex items-center gap-2 rounded-md bg-ink-100 px-4 py-2.5 text-sm font-medium text-primary-600 transition duration-200 hover:bg-ink-200 active:scale-90 sm:inline-flex"
               >
                 <i class="pi pi-user-plus" aria-hidden="true"></i>
                 Register
@@ -133,7 +133,7 @@ const checkout = () => {
             <button
               type="button"
               aria-label="Open your cart"
-              class="relative rounded-sm bg-ink-100 p-2.5 text-ink-600 transition hover:text-ink-700"
+              class="relative rounded-md bg-ink-100 px-3 py-2.5 text-ink-600 transition duration-200 hover:text-ink-700 active:scale-90"
               @click="isCartOpen = !isCartOpen"
             >
               <i class="pi pi-shopping-cart text-sm" aria-hidden="true"></i>
@@ -180,11 +180,7 @@ const checkout = () => {
 
                 <ul v-if="cart.items.length" class="max-h-72 overflow-y-auto divide-y divide-ink-100">
                   <li v-for="item in cart.items" :key="item.id" class="flex gap-3 p-3">
-                    <img
-                      :src="item.image"
-                      :alt="item.name"
-                      class="h-16 w-12 shrink-0 rounded-lg object-cover"
-                    />
+                    <img :src="item.image" :alt="item.name" class="h-16 w-12 shrink-0 rounded-lg object-cover" />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-start justify-between gap-2">
                         <p class="truncate text-sm font-medium text-ink-900">{{ item.name }}</p>
@@ -197,7 +193,9 @@ const checkout = () => {
                           <i class="pi pi-times text-xs" aria-hidden="true"></i>
                         </button>
                       </div>
-                      <p class="mt-0.5 text-xs font-semibold text-primary-600">${{ (item.price * item.qty).toFixed(2) }}</p>
+                      <p class="mt-0.5 text-xs font-semibold text-primary-600">
+                        ${{ (item.price * item.qty).toFixed(2) }}
+                      </p>
                       <div class="mt-1.5 flex items-center gap-2">
                         <button
                           type="button"
