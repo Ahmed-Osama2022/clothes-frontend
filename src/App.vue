@@ -1,3 +1,10 @@
+<script setup>
+import Navbar from './components/Navbar.vue';
+</script>
+
 <template>
-  <router-view />
+  <div class="min-h-screen bg-snow-100">
+    <Navbar />
+    <router-view />
+  </div>
 </template>
