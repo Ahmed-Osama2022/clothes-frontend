@@ -66,6 +66,7 @@ sections — see the "connect the dots" map at the end).
 | GET | `/api/products` | `category`, `sort` (recommended\|price-low\|price-high\|name), `locale` | shop grid |
 | GET | `/api/products/{id}` | `locale` | product page (+ `related`) |
 | GET | `/api/products/{id}/related` | `limit`, `locale` | related grid |
+| GET | `/api/products/{id}/stock` | — | per-size availability (size selector + add-to-cart check) |
 | POST | `/api/products/{id}/reviews` | — | submit a review |
 
 `GET /api/products?locale=ar` response (Sanctum-friendly `data`/`meta` shape — `name` already localized):
@@ -73,6 +74,23 @@ sections — see the "connect the dots" map at the end).
 ```json
 { "data": [ { "id": 1, "name": "قمیص أبيض كلاسيكي", "price": 24.99, "category": "signature-collection", "image": "https://…/w=800" } ], "meta": { "current_page": 1, "last_page": 2, "total": 18 } }
 ```
+
+`GET /api/products/{id}/stock` — feeds the size selector on the product page
+(frontend: `src/views/ProductView.vue` → `src/api/stock.js`, faked for now).
+Sizes are locale-independent (`S/M/L/XL…`), so no `locale` param:
+
+```json
+{ "data": { "product_id": 1, "sizes": [
+  { "size": "XS", "in_stock": true,  "quantity": 5 },
+  { "size": "M",  "in_stock": false, "quantity": 0 }
+] } }
+```
+
+Behaviour contract:
+- The list only contains sizes the product offers; `in_stock`/`quantity` drive the UI (disabled + struck-through when `in_stock: false`).
+- The frontend requires a valid selected size before `add-to-cart` and stores it on the cart line (`product.id` + `size` is the unique cart-line key).
+- The backend **must re-check stock at order time** (`POST /api/orders`): if a size sold out between page load and checkout, reject with `409 { "message": "Size M is out of stock" }` — never oversell.
+- Optional realtime/refresh: re-poll this endpoint on page focus or before checkout; the response is cheap (one row per size).
 
 ### Categories
 | Method | Path | Purpose |
@@ -102,6 +120,8 @@ sections — see the "connect the dots" map at the end).
   - Notes: `price` stays decimal in SQL to avoid float drift; the frontend formats with `.toFixed(2)` so the bytes sent can ignore trailing zeros. Keep a `deleted_at` because this demo both "sells out" and "returns for sale" items — soft delete makes the swap reversible without reseeding. Localized columns follow `{field}_{locale}` and are selected per `?locale=` (fallback `_en`), mirroring the frontend's locale-keyed `{ en, ar }` maps in `src/data/*.js`.
 - **categories**: `id`, `slug` (unique), `title_en`/`title_ar`, `eyebrow_en`/`eyebrow_ar`, `description_en`/`description_ar`, `image_url`, `sort_order`.
 - **reviews**: `id`, `product_id` FK, `author`, `role` (or `role_en`/`role_ar`), `rating (1..5)`, `text_en`/`text_ar`, `avatar_url`.
+- **product_sizes**: `id`, `product_id` FK, `size` (varchar, e.g. `"M"`), `quantity` (unsigned int). Unique index on (`product_id`, `size`). Backs `GET /api/products/{id}/stock`; products without size records return an empty `sizes` array and the frontend omits the selector.
+- **order_items**: `id`, `order_id` FK, `product_id` FK, `size` (varchar), `unit_price`, `quantity`, with a `CHECK`: `quantity <=` current `product_sizes.quantity` (enforced at write time → the 409 behaviour above).
 - **promo**: columns the PromoBanner needs → `title_en`/`title_ar`, `discount`, `subtitle_en`/`subtitle_ar`, `image_url`, `ends_at(timestamp)`, `cta_label`, `cta_url`.
 - **orders**: `id`, `user_id` FK nullable, `status`, `total(decimal 10,2)`, timestamps.
 

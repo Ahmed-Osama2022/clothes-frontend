@@ -67,9 +67,8 @@ watch(isCartOpen, (open) => {
   document.body.style.overflow = open && window.innerWidth < 768 ? 'hidden' : '';
 });
 
-const setQty = (id, delta) => {
-  const item = cart.items.find((i) => i.id === id);
-  if (item) cart.setQty(id, item.qty + delta);
+const setQty = (item, delta) => {
+  cart.setQty(item, item.qty + delta);
 };
 
 const checkout = () => {
@@ -222,7 +221,10 @@ const checkout = () => {
                 </div>
 
                 <ul v-if="cart.items.length" class="flex-1 min-h-0 overflow-y-auto divide-y divide-ink-100 md:max-h-72">
-                  <li v-for="item in cart.items" :key="item.id" class="flex gap-3 p-3">
+                  <!-- ======= CART LINE =======
+                       Cart lines are keyed by id+size (see src/stores/cart.js).
+                       Add the chosen size badge to the line so size isn't lost. -->
+                  <li v-for="item in cart.items" :key="`${item.id}__${item.size}`" class="flex gap-3 p-3">
                     <img :src="item.image" :alt="item.name" class="h-16 w-12 shrink-0 rounded-lg object-cover" />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-start justify-between gap-2">
@@ -231,11 +233,14 @@ const checkout = () => {
                           type="button"
                           :aria-label="t('nav.removeItem')"
                           class="rounded-md p-0.5 text-ink-400 transition duration-200 hover:text-rose-500 active:scale-90"
-                          @click="cart.remove(item.id)"
+                          @click="cart.remove(item)"
                         >
                           <i class="pi pi-times text-xs" aria-hidden="true"></i>
                         </button>
                       </div>
+                      <p v-if="item.size" class="mt-1 text-[11px] font-medium text-ink-500">
+                        {{ t('nav.size') }}: <span class="font-semibold text-primary-600">{{ item.size }}</span>
+                      </p>
                       <p class="mt-0.5 text-xs font-semibold text-primary-600">
                         ${{ (item.price * item.qty).toFixed(2) }}
                       </p>
@@ -244,7 +249,7 @@ const checkout = () => {
                           type="button"
                           :aria-label="t('nav.decreaseQty')"
                           class="rounded-md bg-ink-100 p-1.5 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90 md:p-2.5"
-                          @click="setQty(item.id, -1)"
+                          @click="setQty(item, -1)"
                         >
                           <i class="pi pi-minus text-xs md:text-base" aria-hidden="true"></i>
                         </button>
@@ -253,7 +258,7 @@ const checkout = () => {
                           type="button"
                           :aria-label="t('nav.increaseQty')"
                           class="rounded-md bg-ink-100 p-1.5 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90 md:p-2.5"
-                          @click="setQty(item.id, 1)"
+                          @click="setQty(item, 1)"
                         >
                           <i class="pi pi-plus text-xs md:text-base" aria-hidden="true"></i>
                         </button>

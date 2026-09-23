@@ -2,13 +2,17 @@ import { defineStore } from 'pinia';
 
 // ======= SHOPPING CART STORE =======
 // Holds cart items in memory + mirrors them to localStorage ('cart_key')
-// so the cart survives page reloads. Items are keyed by product.id.
+// so the cart survives page reloads. A line is keyed by product.id + size
+// (e.g. "3__M"), so the same product in two sizes stays two separate lines.
 // Usage in any component:
 //   const cart = useCartStore()
-//   cart.add(product)        // merge quantity if already in cart
-//   cart.setQty(id, qty)     // change quantity (0 removes)
-//   cart.remove(id)          // delete a line
+//   cart.add({ ...product, size: 'M' }, qty)   // merge qty if same product+size already in cart
+//   cart.setQty(item, qty)                     // change quantity (0 removes)
+//   cart.remove(item)                          // delete a line (pass the full item)
+
 const STORAGE_KEY = 'cart_key';
+
+const lineKey = (item) => `${item.id}__${item.size || ''}`;
 
 const loadInitial = () => {
   try {
@@ -29,26 +33,36 @@ export const useCartStore = defineStore('cart', {
   },
   actions: {
     add(product, qty = 1) {
-      const existing = this.items.find((item) => item.id === product.id);
+      const key = lineKey(product);
+      const existing = this.items.find((item) => lineKey(item) === key);
       if (existing) {
         existing.qty += qty;
       } else {
-        this.items.push({ id: product.id, name: product.name, price: product.price, image: product.image, qty });
+        this.items.push({
+          id: product.id,
+          size: product.size || '',
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          qty,
+        });
       }
       this.persist();
     },
-    setQty(id, qty) {
-      const item = this.items.find((i) => i.id === id);
-      if (!item) return;
+    setQty(item, qty) {
+      const key = lineKey(item);
+      const existing = this.items.find((i) => lineKey(i) === key);
+      if (!existing) return;
       if (qty <= 0) {
-        this.remove(id);
+        this.remove(item);
         return;
       }
-      item.qty = qty;
+      existing.qty = qty;
       this.persist();
     },
-    remove(id) {
-      this.items = this.items.filter((i) => i.id !== id);
+    remove(item) {
+      const key = lineKey(item);
+      this.items = this.items.filter((i) => lineKey(i) !== key);
       this.persist();
     },
     clear() {
