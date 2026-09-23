@@ -15,6 +15,11 @@ Frontend `HomeView` renders this **one** call (HomeSection data flows into the
 `HeroSection`, `FeaturedCategories`, `BestSellers`, `PromoBanner`, `Testimonials`
 sections — see the "connect the dots" map at the end).
 
+> **Locale**: pass the active locale as a query param — `GET /api/home?locale=ar`
+> (`en` default, falls back to `en`). The backend returns **already-localized**
+> strings (see the model note in section 3), so the frontend applies no further
+> translation to data content.
+
 ```json
 {
   "data": {
@@ -57,23 +62,23 @@ sections — see the "connect the dots" map at the end).
 
 ### Products
 | Method | Path | Query | Purpose |
-|---|---|---|---|
-| GET | `/api/products` | `category`, `sort` (recommended\|price-low\|price-high\|name) | shop grid |
-| GET | `/api/products/{id}` | — | product page (+ `related`) |
-| GET | `/api/products/{id}/related` | `limit` | related grid |
+|---|---|---:|---|
+| GET | `/api/products` | `category`, `sort` (recommended\|price-low\|price-high\|name), `locale` | shop grid |
+| GET | `/api/products/{id}` | `locale` | product page (+ `related`) |
+| GET | `/api/products/{id}/related` | `limit`, `locale` | related grid |
 | POST | `/api/products/{id}/reviews` | — | submit a review |
 
-`GET /api/products` response (Sanctum-friendly `data`/`meta` shape):
+`GET /api/products?locale=ar` response (Sanctum-friendly `data`/`meta` shape — `name` already localized):
 
 ```json
-{ "data": [ { "id": 1, "name": "Classic White Tee", "price": 24.99, "category": "signature-collection", "image": "https://…/w=800" } ], "meta": { "current_page": 1, "last_page": 2, "total": 18 } }
+{ "data": [ { "id": 1, "name": "قمیص أبيض كلاسيكي", "price": 24.99, "category": "signature-collection", "image": "https://…/w=800" } ], "meta": { "current_page": 1, "last_page": 2, "total": 18 } }
 ```
 
 ### Categories
 | Method | Path | Purpose |
-|---|---|---|
-| GET | `/api/categories` | navbar/featured tiles |
-| GET | `/api/categories/{slug}` | category page (header + products) |
+|---|---|---:|
+| GET | `/api/categories?locale=ar` | navbar/featured tiles |
+| GET | `/api/categories/{slug}` | category page (header + products; pass `locale` query too) |
 
 ### Auth (Sanctum — see `src/api/auth.js` + `src/stores/auth.js`)
 | Method | Path | Purpose |
@@ -93,11 +98,11 @@ sections — see the "connect the dots" map at the end).
 
 ## 3. Models (Laravel migration/SQL shapes to add later)
 
-- **products**: `id`, `name`, `price(decimal 10,2)`, `category_id` FK, `description(optional)`, `image_url`, `is_featured(unsigned tinyint bool)`, `created_at/deleted_at` (soft delete for the sale-based demo).
-  - Notes: `price` stays decimal in SQL to avoid float drift; the frontend formats with `.toFixed(2)` so the bytes sent can ignore trailing zeros. Keep a `deleted_at` because this demo both "sells out" and "returns for sale" items — soft delete makes the swap reversible without reseeding.
-- **categories**: `id`, `slug` (unique), `title`, `eyebrow`, `description`, `image_url`, `sort_order`.
-- **reviews**: `id`, `product_id` FK, `author`, `role`, `rating (1..5)`, `text`, `avatar_url`.
-- **promo**: columns the PromoBanner needs → `title`, `discount`, `subtitle`, `image_url`, `ends_at(timestamp)`, `cta_label`, `cta_url`.
+- **products**: `id`, `name_ar`, `name_en` (localized pair), `price(decimal 10,2)`, `category_id` FK, `description_ar`/`description_en` (optional), `image_url`, `is_featured(unsigned tinyint bool)`, `created_at/deleted_at` (soft delete for the sale-based demo).
+  - Notes: `price` stays decimal in SQL to avoid float drift; the frontend formats with `.toFixed(2)` so the bytes sent can ignore trailing zeros. Keep a `deleted_at` because this demo both "sells out" and "returns for sale" items — soft delete makes the swap reversible without reseeding. Localized columns follow `{field}_{locale}` and are selected per `?locale=` (fallback `_en`), mirroring the frontend's locale-keyed `{ en, ar }` maps in `src/data/*.js`.
+- **categories**: `id`, `slug` (unique), `title_en`/`title_ar`, `eyebrow_en`/`eyebrow_ar`, `description_en`/`description_ar`, `image_url`, `sort_order`.
+- **reviews**: `id`, `product_id` FK, `author`, `role` (or `role_en`/`role_ar`), `rating (1..5)`, `text_en`/`text_ar`, `avatar_url`.
+- **promo**: columns the PromoBanner needs → `title_en`/`title_ar`, `discount`, `subtitle_en`/`subtitle_ar`, `image_url`, `ends_at(timestamp)`, `cta_label`, `cta_url`.
 - **orders**: `id`, `user_id` FK nullable, `status`, `total(decimal 10,2)`, timestamps.
 
 > Frontend fixture data lives in `src/data/catalog.js` — match migration seeds to those exact slugs (`signature-collection`, `mid-season-sale`, `best-sellers`) so category pages keep working with zero frontend changes.

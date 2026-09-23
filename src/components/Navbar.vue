@@ -1,43 +1,56 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useCartStore } from '../stores/cart';
 import { useToastStore } from '../stores/toast';
+import { useLocaleStore } from '../stores/locale';
 import { getHomeData } from '../api/home';
+import LocaleSwitcher from './LocaleSwitcher.vue';
 
+const { t } = useI18n();
 const isOpen = ref(false);
 const isCartOpen = ref(false);
 const route = useRoute();
 const cart = useCartStore();
 const toast = useToastStore();
+const localeStore = useLocaleStore();
 
 // ======= MOBILE MENU LINKS =======
 // Static links for the hamburger menu on small screens. Category links are NOT
 // listed here — they are added dynamically below (fetched from the backend).
+// Labels are UI chrome -> translated via i18n (src/i18n/locales/*.js).
 const mobileLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/shop', label: 'Shop' },
-  { to: '/about', label: 'About' },
-  { to: '/testcard', label: 'Test Card' },
+  { to: '/', labelKey: 'nav.home' },
+  { to: '/shop', labelKey: 'nav.shop' },
+  { to: '/about', labelKey: 'nav.about' },
+  { to: '/testcard', labelKey: 'nav.testCard' },
 ];
 
 // ======= DYNAMIC CATEGORY LINKS (hamburger menu) =======
 // Categories come from the backend (GET /api/home -> data.categories, see
 // src/api/home.js + apis.md). Fake data is served for now; swap src/api/home.js
 // for the real client when the Laravel API is up — no changes needed here.
+// The fetch is locale-aware (getHomeData(locale)) and re-runs on locale change.
 const categories = ref([]);
 const isCategoriesLoading = ref(true);
 
-onMounted(async () => {
+const loadCategories = async () => {
+  isCategoriesLoading.value = true;
   try {
-    const { data } = await getHomeData();
+    const { data } = await getHomeData(localeStore.locale);
     categories.value = data.categories;
   } catch {
     categories.value = []; // menu still works if the call fails
   } finally {
     isCategoriesLoading.value = false;
   }
-});
+};
+
+onMounted(loadCategories);
+
+// Re-fetch categories when the locale changes (backend-tier content).
+watch(() => localeStore.locale, loadCategories);
 
 // Close the mobile menu + cart panel on every route change.
 watch(
@@ -60,7 +73,7 @@ const setQty = (id, delta) => {
 
 const checkout = () => {
   isCartOpen.value = false;
-  toast.info('Checkout is coming soon');
+  toast.info(t('nav.checkoutSoon'));
 };
 </script>
 
@@ -70,7 +83,7 @@ const checkout = () => {
       <div class="flex h-16 items-center justify-between">
         <div class="flex-1 md:flex md:items-center md:gap-12">
           <RouterLink to="/" class="flex items-center gap-2 text-primary-600">
-            <span class="sr-only">Home</span>
+            <span class="sr-only">{{ t('nav.home') }}</span>
             <svg
               class="h-8 w-8"
               viewBox="0 0 24 24"
@@ -83,7 +96,7 @@ const checkout = () => {
                 fill="currentColor"
               />
             </svg>
-            <span class="text-lg font-bold text-ink-900">Clothes Shop</span>
+            <span class="text-lg font-bold text-ink-900">{{ t('brand') }}</span>
           </RouterLink>
         </div>
 
@@ -99,7 +112,7 @@ const checkout = () => {
                   active-class="text-primary-600 font-semibold"
                   exact-active-class="text-primary-600 font-semibold"
                 >
-                  Home
+                  {{ t('nav.home') }}
                 </RouterLink>
               </li>
               <li>
@@ -108,7 +121,7 @@ const checkout = () => {
                   class="text-ink-500 transition hover:text-ink-700"
                   active-class="text-primary-600 font-semibold"
                 >
-                  Shop
+                  {{ t('nav.shop') }}
                 </RouterLink>
               </li>
               <li>
@@ -117,7 +130,7 @@ const checkout = () => {
                   class="text-ink-500 transition hover:text-ink-700"
                   active-class="text-primary-600 font-semibold"
                 >
-                  About
+                  {{ t('nav.about') }}
                 </RouterLink>
               </li>
               <li>
@@ -126,13 +139,15 @@ const checkout = () => {
                   class="text-ink-500 transition hover:text-ink-700"
                   active-class="text-primary-600 font-semibold"
                 >
-                  Test Card
+                  {{ t('nav.testCard') }}
                 </RouterLink>
               </li>
             </ul>
           </nav>
 
           <div class="relative flex items-center gap-3">
+            <LocaleSwitcher />
+
             <!-- ======= CTA BUTTONS (Login / Register) =======
                  Routes /login and /register exist now (src/views/). -->
             <div class="hidden sm:flex sm:gap-2 md:flex">
@@ -141,7 +156,7 @@ const checkout = () => {
                 class="inline-flex items-center gap-2 rounded-md bg-primary-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90"
               >
                 <i class="pi pi-sign-in" aria-hidden="true"></i>
-                Login
+                {{ t('nav.login') }}
               </RouterLink>
 
               <RouterLink
@@ -149,7 +164,7 @@ const checkout = () => {
                 class="hidden inline-flex items-center gap-2 rounded-md bg-ink-100 px-4 py-2.5 text-sm font-medium text-primary-600 transition duration-200 hover:bg-ink-200 active:scale-90 sm:inline-flex"
               >
                 <i class="pi pi-user-plus" aria-hidden="true"></i>
-                Register
+                {{ t('nav.register') }}
               </RouterLink>
             </div>
 
@@ -157,7 +172,7 @@ const checkout = () => {
                  Count comes from the cart store (marked up under badge). -->
             <button
               type="button"
-              aria-label="Open your cart"
+              :aria-label="t('nav.openCart')"
               class="relative rounded-md bg-ink-100 px-3 py-2.5 text-ink-600 transition duration-200 hover:text-ink-700 active:scale-90"
               @click="isCartOpen = !isCartOpen"
             >
@@ -172,7 +187,7 @@ const checkout = () => {
 
             <button
               type="button"
-              aria-label="Toggle menu"
+              :aria-label="t('nav.toggleMenu')"
               :aria-expanded="isOpen"
               class="rounded-sm bg-ink-100 p-2.5 text-ink-600 transition duration-200 hover:text-ink-700 active:scale-90 md:hidden"
               @click="isOpen = !isOpen"
@@ -192,12 +207,12 @@ const checkout = () => {
               >
                 <div class="flex items-center justify-between border-b border-ink-100 px-4 py-3">
                   <p class="text-sm font-semibold text-ink-900">
-                    Your Cart
+                    {{ t('nav.yourCart') }}
                     <span v-if="cart.count" class="ml-1 text-ink-400">({{ cart.count }})</span>
                   </p>
                   <button
                     type="button"
-                    aria-label="Close cart"
+                    :aria-label="t('nav.closeCart')"
                     class="rounded-md p-1 text-ink-400 transition duration-200 hover:text-ink-700 active:scale-90"
                     @click="isCartOpen = false"
                   >
@@ -213,7 +228,7 @@ const checkout = () => {
                         <p class="truncate text-sm font-medium text-ink-900">{{ item.name }}</p>
                         <button
                           type="button"
-                          aria-label="Remove item"
+                          :aria-label="t('nav.removeItem')"
                           class="rounded-md p-0.5 text-ink-400 transition duration-200 hover:text-rose-500 active:scale-90"
                           @click="cart.remove(item.id)"
                         >
@@ -226,7 +241,7 @@ const checkout = () => {
                       <div class="mt-1.5 flex items-center gap-2">
                         <button
                           type="button"
-                          aria-label="Decrease quantity"
+                          :aria-label="t('nav.decreaseQty')"
                           class="rounded-md bg-ink-100 p-1.5 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90 md:p-2.5"
                           @click="setQty(item.id, -1)"
                         >
@@ -235,7 +250,7 @@ const checkout = () => {
                         <span class="w-6 text-center text-sm font-medium text-ink-900 md:w-8 md:text-base md:font-semibold">{{ item.qty }}</span>
                         <button
                           type="button"
-                          aria-label="Increase quantity"
+                          :aria-label="t('nav.increaseQty')"
                           class="rounded-md bg-ink-100 p-1.5 text-ink-600 transition duration-200 hover:bg-ink-200 active:scale-90 md:p-2.5"
                           @click="setQty(item.id, 1)"
                         >
@@ -248,19 +263,19 @@ const checkout = () => {
 
                 <div v-else class="px-4 py-10 text-center">
                   <i class="pi pi-shopping-cart text-3xl text-ink-300" aria-hidden="true"></i>
-                  <p class="mt-3 text-sm text-ink-500">Your cart is empty</p>
+                  <p class="mt-3 text-sm text-ink-500">{{ t('nav.emptyCart') }}</p>
                   <RouterLink
                     to="/shop"
                     class="mt-3 inline-block text-sm font-semibold text-primary-600 hover:text-primary-700"
                     @click="isCartOpen = false"
                   >
-                    Start shopping
+                    {{ t('nav.startShopping') }}
                   </RouterLink>
                 </div>
 
                 <div v-if="cart.items.length" class="border-t border-ink-100 px-4 py-3">
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-ink-500">Total</span>
+                    <span class="text-ink-500">{{ t('nav.total') }}</span>
                     <span class="text-base font-bold text-ink-900">${{ cart.total.toFixed(2) }}</span>
                   </div>
                   <button
@@ -269,7 +284,7 @@ const checkout = () => {
                     @click="checkout"
                   >
                     <i class="pi pi-check" aria-hidden="true"></i>
-                    Checkout
+                    {{ t('nav.checkout') }}
                   </button>
                 </div>
               </div>
@@ -301,7 +316,7 @@ const checkout = () => {
             exact-active-class="bg-primary-50 text-primary-600 font-semibold"
             @click="isOpen = false"
           >
-            {{ link.label }}
+            {{ t(link.labelKey) }}
           </RouterLink>
 
           <!-- ======= DYNAMIC CATEGORY LINKS =======
@@ -310,8 +325,8 @@ const checkout = () => {
                heading if the menu feels busy, or keep them to separate pages
                from shop categories. -->
           <div class="mt-2 border-t border-ink-100 pt-3">
-            <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-ink-400">Categories</p>
-            <p v-if="isCategoriesLoading" class="px-3 py-2.5 text-sm text-ink-400">Loading categories…</p>
+            <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-ink-400">{{ t('nav.categories') }}</p>
+            <p v-if="isCategoriesLoading" class="px-3 py-2.5 text-sm text-ink-400">{{ t('nav.loadingCategories') }}</p>
             <RouterLink
               v-for="cat in categories"
               :key="cat.slug"
@@ -334,14 +349,14 @@ const checkout = () => {
               class="flex-1 rounded-md bg-primary-600 px-4 py-2.5 text-center text-sm font-medium text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90"
               @click="isOpen = false"
             >
-              Login
+              {{ t('nav.login') }}
             </RouterLink>
             <RouterLink
               to="/register"
               class="flex-1 rounded-md bg-ink-100 px-4 py-2.5 text-center text-sm font-medium text-primary-600 transition duration-200 hover:bg-ink-200 active:scale-90"
               @click="isOpen = false"
             >
-              Register
+              {{ t('nav.register') }}
             </RouterLink>
           </div>
         </div>

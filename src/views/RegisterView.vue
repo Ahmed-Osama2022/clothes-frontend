@@ -1,5 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useToastStore } from '../stores/toast';
@@ -7,6 +8,8 @@ import { useToastStore } from '../stores/toast';
 // ======= REGISTER PAGE (route: /register) =======
 // Realtime validation (errors as you type) + toasts for success/error.
 // Register calls src/api/auth.js (axios client prepared for Laravel + Sanctum).
+// All labels/errors are UI chrome -> translated via i18n (auth.* keys).
+const { t } = useI18n();
 const router = useRouter();
 const auth = useAuthStore();
 const toast = useToastStore();
@@ -30,24 +33,24 @@ const touched = reactive({
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 const nameError = computed(() => {
-  if (!fullName.value) return 'Full name is required';
-  return fullName.value.trim().length < 2 ? 'Name must be at least 2 characters' : '';
+  if (!fullName.value) return t('auth.nameRequired');
+  return fullName.value.trim().length < 2 ? t('auth.nameMin') : '';
 });
 const emailError = computed(() => {
-  if (!email.value) return 'Email is required';
-  return isEmail(email.value) ? '' : 'Enter a valid email address';
+  if (!email.value) return t('auth.emailRequired');
+  return isEmail(email.value) ? '' : t('auth.emailInvalid');
 });
 const passwordError = computed(() => {
-  if (!password.value) return 'Password is required';
-  if (password.value.length < 8) return 'Password must be at least 8 characters';
-  if (!/[a-zA-Z]/.test(password.value) || !/\d/.test(password.value)) return 'Use at least one letter and one number';
+  if (!password.value) return t('auth.passwordRequired');
+  if (password.value.length < 8) return t('auth.passwordMin8');
+  if (!/[a-zA-Z]/.test(password.value) || !/\d/.test(password.value)) return t('auth.passwordMix');
   return '';
 });
 const confirmError = computed(() => {
-  if (!confirm.value) return 'Confirm your password';
-  return confirm.value === password.value ? '' : 'Passwords do not match';
+  if (!confirm.value) return t('auth.confirmRequired');
+  return confirm.value === password.value ? '' : t('auth.confirmMismatch');
 });
-const termsError = computed(() => (terms.value ? '' : 'You must accept the terms'));
+const termsError = computed(() => (terms.value ? '' : t('auth.termsRequired')));
 
 const hasErrors = computed(() =>
   Boolean(nameError.value || emailError.value || passwordError.value || confirmError.value || termsError.value)
@@ -62,7 +65,7 @@ const handleSubmit = async () => {
   touched.confirm = true;
   touched.terms = true;
   if (hasErrors.value) {
-    toast.error('Please fix the highlighted fields');
+    toast.error(t('auth.fixFields'));
     return;
   }
 
@@ -74,10 +77,10 @@ const handleSubmit = async () => {
       email: email.value,
       password: password.value,
     });
-    toast.success('Account created. Welcome aboard!');
+    toast.success(t('auth.welcomeAboard'));
     router.push('/login');
   } catch (error) {
-    toast.error(error.message || 'Registration failed');
+    toast.error(error.message || t('auth.registrationFailed'));
   } finally {
     submitting.value = false;
   }
@@ -94,15 +97,15 @@ const handleSubmit = async () => {
             <i class="pi pi-user-plus" aria-hidden="true"></i>
           </span>
           <div>
-            <h1 class="text-2xl font-bold text-ink-900">Create account</h1>
-            <p class="text-sm text-ink-500">Join Clothes Shop</p>
+            <h1 class="text-2xl font-bold text-ink-900">{{ $t('auth.createAccount') }}</h1>
+            <p class="text-sm text-ink-500">{{ $t('auth.joinPrompt') }}</p>
           </div>
         </div>
 
         <form class="mt-8 space-y-5" novalidate @submit.prevent="handleSubmit">
           <!-- ======= FULL NAME ======= -->
           <div>
-            <label for="reg-name" class="mb-1.5 block text-sm font-medium text-ink-700">Full name</label>
+            <label for="reg-name" class="mb-1.5 block text-sm font-medium text-ink-700">{{ $t('auth.fullName') }}</label>
             <div class="relative">
               <i class="pi pi-user absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-ink-400" aria-hidden="true"></i>
               <input
@@ -110,7 +113,7 @@ const handleSubmit = async () => {
                 v-model="fullName"
                 type="text"
                 autocomplete="name"
-                placeholder="Jane Doe"
+                :placeholder="$t('auth.namePlaceholder')"
                 class="w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-ink-900 outline-none transition focus:border-primary-400"
                 :class="showError('fullName', nameError) ? 'border-rose-400 focus:border-rose-400' : 'border-ink-200'"
                 @blur="touched.fullName = true"
@@ -124,7 +127,7 @@ const handleSubmit = async () => {
 
           <!-- ======= EMAIL ======= -->
           <div>
-            <label for="reg-email" class="mb-1.5 block text-sm font-medium text-ink-700">Email</label>
+            <label for="reg-email" class="mb-1.5 block text-sm font-medium text-ink-700">{{ $t('auth.email') }}</label>
             <div class="relative">
               <i class="pi pi-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-ink-400" aria-hidden="true"></i>
               <input
@@ -132,7 +135,7 @@ const handleSubmit = async () => {
                 v-model="email"
                 type="email"
                 autocomplete="email"
-                placeholder="you@example.com"
+                :placeholder="$t('auth.emailPlaceholder')"
                 class="w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-ink-900 outline-none transition focus:border-primary-400"
                 :class="showError('email', emailError) ? 'border-rose-400 focus:border-rose-400' : 'border-ink-200'"
                 @blur="touched.email = true"
@@ -146,7 +149,7 @@ const handleSubmit = async () => {
 
           <!-- ======= PASSWORD ======= -->
           <div>
-            <label for="reg-password" class="mb-1.5 block text-sm font-medium text-ink-700">Password</label>
+            <label for="reg-password" class="mb-1.5 block text-sm font-medium text-ink-700">{{ $t('auth.password') }}</label>
             <div class="relative">
               <i class="pi pi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-ink-400" aria-hidden="true"></i>
               <input
@@ -154,14 +157,14 @@ const handleSubmit = async () => {
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="new-password"
-                placeholder="At least 8 characters"
+                :placeholder="$t('auth.passwordPlaceholder')"
                 class="w-full rounded-lg border bg-white py-2.5 pl-10 pr-11 text-sm text-ink-900 outline-none transition focus:border-primary-400"
                 :class="showError('password', passwordError) ? 'border-rose-400 focus:border-rose-400' : 'border-ink-200'"
                 @input="touched.password = true"
               />
               <button
                 type="button"
-                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :aria-label="showPassword ? $t('auth.hidePassword') : $t('auth.showPassword')"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 transition duration-200 hover:text-ink-600 active:scale-90"
                 @click="showPassword = !showPassword"
               >
@@ -176,7 +179,7 @@ const handleSubmit = async () => {
 
           <!-- ======= CONFIRM PASSWORD ======= -->
           <div>
-            <label for="reg-confirm" class="mb-1.5 block text-sm font-medium text-ink-700">Confirm password</label>
+            <label for="reg-confirm" class="mb-1.5 block text-sm font-medium text-ink-700">{{ $t('auth.confirmPassword') }}</label>
             <div class="relative">
               <i class="pi pi-check-circle absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-ink-400" aria-hidden="true"></i>
               <input
@@ -184,14 +187,14 @@ const handleSubmit = async () => {
                 v-model="confirm"
                 :type="showConfirm ? 'text' : 'password'"
                 autocomplete="new-password"
-                placeholder="Repeat your password"
+                :placeholder="$t('auth.repeatPassword')"
                 class="w-full rounded-lg border bg-white py-2.5 pl-10 pr-11 text-sm text-ink-900 outline-none transition focus:border-primary-400"
                 :class="showError('confirm', confirmError) ? 'border-rose-400 focus:border-rose-400' : 'border-ink-200'"
                 @input="touched.confirm = true"
               />
               <button
                 type="button"
-                :aria-label="showConfirm ? 'Hide password' : 'Show password'"
+                :aria-label="showConfirm ? $t('auth.hidePassword') : $t('auth.showPassword')"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 transition duration-200 hover:text-ink-600 active:scale-90"
                 @click="showConfirm = !showConfirm"
               >
@@ -214,7 +217,8 @@ const handleSubmit = async () => {
                 @change="touched.terms = true"
               />
               <span>
-                I agree to the <a href="#" class="font-medium text-primary-600 hover:text-primary-700">Terms of Service</a>
+                {{ $t('auth.agreeTerms') }}
+                <a href="#" class="font-medium text-primary-600 hover:text-primary-700">{{ $t('auth.termsOfService') }}</a>
               </span>
             </label>
             <p v-if="showError('terms', termsError)" class="mt-1.5 flex items-center gap-1 text-sm text-rose-600">
@@ -229,13 +233,13 @@ const handleSubmit = async () => {
             class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <i class="pi" :class="submitting ? 'pi-spinner pi-spin' : 'pi-user-plus'" aria-hidden="true"></i>
-            {{ submitting ? 'Creating account…' : 'Create account' }}
+            {{ submitting ? $t('auth.creatingAccount') : $t('auth.createAccount') }}
           </button>
         </form>
 
         <p class="mt-6 text-center text-sm text-ink-500">
-          Already have an account?
-          <RouterLink to="/login" class="font-semibold text-primary-600 hover:text-primary-700">Sign in</RouterLink>
+          {{ $t('auth.hasAccount') }}
+          <RouterLink to="/login" class="font-semibold text-primary-600 hover:text-primary-700">{{ $t('auth.signInLink') }}</RouterLink>
         </p>
       </div>
     </div>

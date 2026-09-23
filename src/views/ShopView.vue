@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { categories, products } from '../data/catalog';
 import ProductCard from '../components/ProductCard.vue';
+import { pickByLocale } from '../i18n';
 
 // ======= SHOP PAGE STATE =======
 // Filters by category ('all' shows everything) + sorts the grid.
@@ -10,8 +11,8 @@ const active = ref('all');
 const sort = ref('recommended');
 
 const filters = computed(() => [
-  { slug: 'all', label: 'All' },
-  ...Object.keys(categories).map((slug) => ({ slug, label: categories[slug].title })),
+  { slug: 'all', labelKey: 'shop.all' },
+  ...Object.keys(categories).map((slug) => ({ slug, label: pickByLocale(categories[slug]).title })),
 ]);
 
 const sortedAndFiltered = computed(() => {
@@ -25,7 +26,7 @@ const sortedAndFiltered = computed(() => {
       list.sort((a, b) => b.price - a.price);
       break;
     case 'name':
-      list.sort((a, b) => a.name.localeCompare(b.name));
+      list.sort((a, b) => pickByLocale(a.name).localeCompare(pickByLocale(b.name)));
       break;
     default:
       break;
@@ -42,10 +43,10 @@ const sortedAndFiltered = computed(() => {
   <main>
     <section class="bg-gradient-to-r from-ink-900 via-ink-800 to-primary-900 py-16 text-white">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-aos="fade-up">
-        <p class="text-sm font-semibold uppercase tracking-wide text-primary-300">The Collection</p>
-        <h1 class="mt-2 text-4xl font-bold sm:text-5xl">Explore All</h1>
+        <p class="text-sm font-semibold uppercase tracking-wide text-primary-300">{{ $t('shop.eyebrow') }}</p>
+        <h1 class="mt-2 text-4xl font-bold sm:text-5xl">{{ $t('shop.title') }}</h1>
         <p class="mt-3 max-w-2xl text-lg text-snow-100/80">
-          The full catalog — styles for every day, every season.
+          {{ $t('shop.subtitle') }}
         </p>
       </div>
     </section>
@@ -69,26 +70,26 @@ const sortedAndFiltered = computed(() => {
             "
             @click="active = filter.slug"
           >
-            {{ filter.label }}
+            {{ filter.labelKey ? $t(filter.labelKey) : filter.label }}
           </button>
         </div>
 
         <label class="flex items-center gap-2 text-sm text-ink-500">
-          Sort by
+          {{ $t('shop.sortBy') }}
           <select
             v-model="sort"
             class="cursor-pointer rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm font-medium text-ink-700 outline-none transition focus:border-primary-400"
           >
-            <option value="recommended">Recommended</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="name">Name (A–Z)</option>
+            <option value="recommended">{{ $t('shop.recommended') }}</option>
+            <option value="price-low">{{ $t('shop.priceLow') }}</option>
+            <option value="price-high">{{ $t('shop.priceHigh') }}</option>
+            <option value="name">{{ $t('shop.name') }}</option>
           </select>
         </label>
       </div>
 
       <p class="mb-6 text-sm text-ink-500" data-aos="fade-up">
-        {{ sortedAndFiltered.length }} items
+        {{ $t('shop.items', { count: sortedAndFiltered.length }) }}
       </p>
 
       <!-- ======= GRID ANIMATION =======
@@ -113,8 +114,8 @@ const sortedAndFiltered = computed(() => {
           :key="`empty-${active}-${sort}`"
           class="py-20 text-center"
         >
-          <p class="text-2xl font-semibold text-ink-900">No products yet</p>
-          <p class="mt-2 text-sm text-ink-500">Add some products in src/data/catalog.js</p>
+          <p class="text-2xl font-semibold text-ink-900">{{ $t('shop.emptyTitle') }}</p>
+          <p class="mt-2 text-sm text-ink-500">{{ $t('shop.emptyHint') }}</p>
         </div>
       </transition>
     </section>

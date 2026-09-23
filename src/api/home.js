@@ -4,43 +4,34 @@
 // swapping this file for `import api from './client'` later requires ZERO changes
 // in the components that consume it.
 //   Real swap (once backend is up and VITE_API_URL/BASE_URL point at it):
-//     import api from './client';
-//     export const getHomeData = () => api.get('/home');
+//     export const getHomeData = (locale) => api.get('/home', { params: { locale } });
 // Everything else keeps working unchanged.
-const FAKE_JSON = {
-  data: {
-    categories: [
-      {
-        slug: 'signature-collection',
-        title: 'Signature Collection',
-        eyebrow: 'New Season',
-        count: 6,
-        url: '/category/signature-collection',
-        image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=1600',
-      },
-      {
-        slug: 'mid-season-sale',
-        title: 'Mid-Season Sale',
-        eyebrow: 'Up to 50% Off',
-        count: 6,
-        url: '/category/mid-season-sale',
-        image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600',
-      },
-      {
-        slug: 'best-sellers',
-        title: 'Best Sellers',
-        eyebrow: 'New Arrivals',
-        count: 6,
-        url: '/category/best-sellers',
-        image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&q=80&w=1600',
-      },
-    ],
-  },
+//
+// The payload is derived from src/data/catalog.js (slash-independent ids, names
+// resolverd per `locale` with en as fallback) so Navbar / FeaturedCategories
+// receive translated rows, exactly like the backend would.
+import { categories } from '../data/catalog';
+import { pickByLocale } from '../i18n';
+
+const buildCategories = (locale) => {
+  const counts = { 'signature-collection': 6, 'mid-season-sale': 6, 'best-sellers': 6 };
+  return Object.entries(categories).map(([slug, cat]) => {
+    const localized = pickByLocale(cat);
+    return {
+      slug,
+      title: localized.title,
+      eyebrow: localized.eyebrow,
+      count: counts[slug] ?? 6,
+      url: `/category/${slug}`,
+      image: cat.image,
+    };
+  });
 };
 
 // Simulated backend latency so the loading state is visible (remove with the
 // real client — it will be a true network call).
-export const getHomeData = () =>
+// Accepts the active locale ('en' | 'ar'); locale content falls back to `en`.
+export const getHomeData = (locale = 'en') =>
   new Promise((resolve) => {
-    setTimeout(() => resolve(FAKE_JSON), 400);
+    setTimeout(() => resolve({ data: { categories: buildCategories(locale) } }), 400);
   });

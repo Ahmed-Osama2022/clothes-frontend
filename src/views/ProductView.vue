@@ -1,24 +1,30 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { categories, products } from '../data/catalog';
 import { useCartStore } from '../stores/cart';
 import { useToastStore } from '../stores/toast';
 import ProductCard from '../components/ProductCard.vue';
+import { pickByLocale } from '../i18n';
 
 // ======= SINGLE PRODUCT PAGE (route: /product/:id) =======
 // Reads the :id param from the URL and pulls the product from src/data/catalog.js.
 // Unknown ids render the 'not found' state.
+// Product/category text is locale-keyed ({ en, ar }) -> pickByLocale.
+const { t } = useI18n();
 const route = useRoute();
 const cart = useCartStore();
 const toast = useToastStore();
 
 const product = computed(() => products.find((p) => p.id === Number(route.params.id)));
 const category = computed(() => (product.value ? categories[product.value.category] : null));
+const localizedProduct = computed(() => (product.value ? pickByLocale(product.value) : null));
+const localizedCategory = computed(() => (category.value ? pickByLocale(category.value) : null));
 
 const description = computed(() =>
   product.value
-    ? `${product.value.name} is part of the ${category.value?.title || 'collection'} — designed to be versatile, comfortable and easy to style for everyday wear.`
+    ? `${pickByLocale(product.value).name} is part of the ${localizedCategory.value?.title || 'collection'} — designed to be versatile, comfortable and easy to style for everyday wear.`
     : ''
 );
 
@@ -35,15 +41,17 @@ const changeQty = (delta) => {
 };
 
 const addToCart = () => {
-  cart.add(product.value, qty.value);
-  toast.success(`${product.value.name} added to cart`);
+  // Store the locally-resolved name snapshot in the cart (like a DB row).
+  cart.add({ ...product.value, name: pickByLocale(product.value).name }, qty.value);
+  toast.success(t('product.addedToCart', { name: pickByLocale(product.value).name }));
   qty.value = 1;
 };
 
+// Trust features are UI chrome -> translated via i18n (product.feature*).
 const features = [
-  { icon: 'pi-truck', label: 'Free shipping on orders over $50' },
-  { icon: 'pi-credit-card', label: 'Secure checkout & easy returns' },
-  { icon: 'pi-shield', label: 'Sustainably sourced fabric' },
+  { icon: 'pi-truck', labelKey: 'product.featureShipping' },
+  { icon: 'pi-credit-card', labelKey: 'product.featureSecure' },
+  { icon: 'pi-shield', labelKey: 'product.featureSustainable' },
 ];
 </script>
 
@@ -52,13 +60,13 @@ const features = [
     <!-- ======= PRODUCT NOT FOUND ======= -->
     <div v-if="!product" class="mx-auto max-w-7xl px-4 py-24 text-center" data-aos="fade-up">
       <i class="pi pi-tag text-5xl text-ink-300" aria-hidden="true"></i>
-      <h1 class="mt-4 text-2xl font-bold text-ink-900">Product not found</h1>
-      <p class="mt-2 text-sm text-ink-500">It may have sold out or the link is broken.</p>
+      <h1 class="mt-4 text-2xl font-bold text-ink-900">{{ $t('product.notFound') }}</h1>
+      <p class="mt-2 text-sm text-ink-500">{{ $t('product.notFoundHint') }}</p>
       <RouterLink
         to="/shop"
         class="mt-6 inline-block rounded-md bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition duration-200 hover:bg-primary-700 active:scale-90"
       >
-        Browse the shop
+        {{ $t('product.browseShop') }}
       </RouterLink>
     </div>
 
@@ -66,13 +74,13 @@ const features = [
     <template v-else>
       <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <nav class="mb-6 text-sm text-ink-500" data-aos="fade-up">
-          <RouterLink to="/" class="hover:text-primary-600">Home</RouterLink>
+          <RouterLink to="/" class="hover:text-primary-600">{{ $t('product.home') }}</RouterLink>
           <span class="mx-2 text-ink-300">/</span>
           <RouterLink :to="`/category/${product.category}`" class="hover:text-primary-600">
-            {{ category?.title }}
+            {{ localizedCategory?.title }}
           </RouterLink>
           <span class="mx-2 text-ink-300">/</span>
-          <span class="font-medium text-ink-900">{{ product.name }}</span>
+          <span class="font-medium text-ink-900">{{ localizedProduct.name }}</span>
         </nav>
 
         <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
@@ -80,7 +88,7 @@ const features = [
           <div class="relative overflow-hidden rounded-3xl bg-white shadow-sm" data-aos="fade-up">
             <img
               :src="product.image"
-              :alt="product.name"
+              :alt="localizedProduct.name"
               class="aspect-[4/5] w-full object-cover"
             />
           </div>
@@ -89,15 +97,15 @@ const features = [
           <div class="flex flex-col" data-aos="fade-up">
             <p class="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary-500">
               <i class="pi pi-tag" aria-hidden="true"></i>
-              {{ category?.eyebrow }}
+              {{ localizedCategory?.eyebrow }}
             </p>
-            <h1 class="mt-2 text-3xl font-bold text-ink-900 sm:text-4xl">{{ product.name }}</h1>
+            <h1 class="mt-2 text-3xl font-bold text-ink-900 sm:text-4xl">{{ localizedProduct.name }}</h1>
 
             <div class="mt-3 flex items-center gap-2 text-sm text-ink-500">
               <span class="flex items-center gap-0.5 text-amber-400">
                 <i v-for="n in 5" :key="n" class="pi pi-star text-xs" aria-hidden="true"></i>
               </span>
-              <span>4.9 · 120 reviews</span>
+              <span>{{ $t('product.reviews', { rating: '4.9', count: 120 }) }}</span>
             </div>
 
             <p class="mt-5 text-3xl font-bold text-primary-600">${{ product.price.toFixed(2) }}</p>
@@ -109,7 +117,7 @@ const features = [
               <div class="flex items-center gap-1 rounded-lg border border-ink-200 bg-white p-1">
                 <button
                   type="button"
-                  aria-label="Decrease quantity"
+                  :aria-label="t('product.decreaseQty')"
                   class="rounded-md p-2 text-ink-600 transition duration-200 hover:bg-ink-100 active:scale-90 disabled:opacity-40"
                   :disabled="qty <= 1"
                   @click="changeQty(-1)"
@@ -119,7 +127,7 @@ const features = [
                 <span class="w-8 text-center text-sm font-semibold text-ink-900">{{ qty }}</span>
                 <button
                   type="button"
-                  aria-label="Increase quantity"
+                  :aria-label="t('product.increaseQty')"
                   class="rounded-md p-2 text-ink-600 transition duration-200 hover:bg-ink-100 active:scale-90 disabled:opacity-40"
                   :disabled="qty >= 10"
                   @click="changeQty(1)"
@@ -134,15 +142,15 @@ const features = [
                 @click="addToCart"
               >
                 <i class="pi pi-cart-plus" aria-hidden="true"></i>
-                Add to Cart
+                {{ $t('product.addToCart') }}
               </button>
             </div>
 
             <!-- ======= TRUST FEATURES ======= -->
             <ul class="mt-8 space-y-3 border-t border-ink-100 pt-6">
-              <li v-for="feature in features" :key="feature.label" class="flex items-center gap-3 text-sm text-ink-500">
+              <li v-for="feature in features" :key="feature.labelKey" class="flex items-center gap-3 text-sm text-ink-500">
                 <i class="pi text-primary-500" :class="feature.icon" aria-hidden="true"></i>
-                {{ feature.label }}
+                {{ $t(feature.labelKey) }}
               </li>
             </ul>
           </div>
@@ -153,9 +161,9 @@ const features = [
            Same category, up to 4 items. Cards navigate to /product/:id. -->
       <section v-if="related.length" class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div class="mb-6 flex items-center justify-between" data-aos="fade-up">
-          <h2 class="text-xl font-bold text-ink-900">You might also like</h2>
+          <h2 class="text-xl font-bold text-ink-900">{{ $t('product.related') }}</h2>
           <RouterLink :to="`/category/${product.category}`" class="text-sm font-semibold text-primary-600 hover:text-primary-700">
-            View all
+            {{ $t('product.viewAll') }}
           </RouterLink>
         </div>
 

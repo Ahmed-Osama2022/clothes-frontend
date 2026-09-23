@@ -1,44 +1,87 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { pickByLocale } from '../i18n';
+
+const { t } = useI18n();
 
 const slides = [
   // ======= EDIT HERO SLIDES HERE =======
+  // Each slide carries a locale map { en: {...}, ar: {...} } (backend-tier
+  // content — verified via pickByLocale in the template). Shared fields live
+  // outside the map: `image`, `category` (slug used by the CTA link).
   // image: Unsplash photo URL | title/accent: headline text | price/discount/pill: shown on the image card
   {
     image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=900',
-    badge: 'New Season 2026',
-    title: 'Fresh Styles,',
-    accent: 'Bold Looks',
-    subtitle: 'Discover the latest drops curated for your everyday — effortless pieces made to move with you.',
-    tag: 'Signature Collection',
-    price: 'From $49.90',
-    discount: '20%',
-    pill: 'Just in',
     category: 'signature-collection',
+    en: {
+      badge: 'New Season 2026',
+      title: 'Fresh Styles,',
+      accent: 'Bold Looks',
+      subtitle: 'Discover the latest drops curated for your everyday — effortless pieces made to move with you.',
+      tag: 'Signature Collection',
+      price: 'From $49.90',
+      discount: '20%',
+      pill: 'Just in',
+    },
+    ar: {
+      badge: 'موسم جديد 2026',
+      title: 'إطلالات جديدة،',
+      accent: 'جريئة',
+      subtitle: 'اكتشف أحدث الإطلالات المختارة ليومك — قطع بسيطة صُنعت لتتحرك معك.',
+      tag: 'المجموعة المميزة',
+      price: 'ابتداءً من $49.90',
+      discount: '20%',
+      pill: 'وصل حديثًا',
+    },
   },
   {
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=900',
-    badge: 'Weekly Sale',
-    title: 'Up to 50% Off',
-    accent: 'This Week',
-    subtitle: 'Seasonal favorites at unbeatable prices. Stock up before the sale ends this Sunday.',
-    tag: 'Mid-Season Sale',
-    price: 'From $19.99',
-    discount: '50%',
-    pill: 'Limited',
     category: 'mid-season-sale',
+    en: {
+      badge: 'Weekly Sale',
+      title: 'Up to 50% Off',
+      accent: 'This Week',
+      subtitle: 'Seasonal favorites at unbeatable prices. Stock up before the sale ends this Sunday.',
+      tag: 'Mid-Season Sale',
+      price: 'From $19.99',
+      discount: '50%',
+      pill: 'Limited',
+    },
+    ar: {
+      badge: 'عرض الأسبوع',
+      title: 'خصم يصل إلى 50%',
+      accent: 'هذا الأسبوع',
+      subtitle: 'مفضلات موسمية بأسعار لا تُقاوم. خزّن قبل انتهاء العرض يوم الأحد.',
+      tag: 'تخفيضات منتصف الموسم',
+      price: 'ابتداءً من $19.99',
+      discount: '50%',
+      pill: 'محدود',
+    },
   },
   {
     image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&q=80&w=900',
-    badge: 'New Arrivals',
-    title: 'Your Wardrobe,',
-    accent: 'Upgraded',
-    subtitle: 'Everyday essentials and statement pieces — sustainably made, seriously comfortable.',
-    tag: 'Best Sellers',
-    price: 'From $29.00',
-    discount: '15%',
-    pill: 'Trending',
     category: 'best-sellers',
+    en: {
+      badge: 'New Arrivals',
+      title: 'Your Wardrobe,',
+      accent: 'Upgraded',
+      subtitle: 'Everyday essentials and statement pieces — sustainably made, seriously comfortable.',
+      tag: 'Best Sellers',
+      price: 'From $29.00',
+      discount: '15%',
+      pill: 'Trending',
+    },
+    ar: {
+      badge: 'وصل حديثًا',
+      title: 'خزانتك،',
+      accent: 'بمستوى جديد',
+      subtitle: 'أساسيات يومية وقطع مميزة — صُنّعت بطرق مستدامة وراحة حقيقية.',
+      tag: 'الأكثر مبيعًا',
+      price: 'ابتداءً من $29.00',
+      discount: '15%',
+      pill: 'رائج',
+    },
   },
 ];
 
@@ -93,17 +136,17 @@ onUnmounted(stop);
             <p
               class="inline-flex items-center gap-2 rounded-full bg-primary-50 px-4 py-1.5 text-sm font-semibold text-primary-700 ring-1 ring-primary-200"
             >
-              {{ slides[current].badge }}
+              {{ pickByLocale(slides[current]).badge }}
               <span class="h-1.5 w-1.5 rounded-full bg-primary-500"></span>
             </p>
 
             <h1 class="text-5xl font-bold leading-tight text-ink-900 sm:text-6xl">
-              {{ slides[current].title }}
-              <span class="text-primary-500">{{ slides[current].accent }}</span>
+              {{ pickByLocale(slides[current]).title }}
+              <span class="text-primary-500">{{ pickByLocale(slides[current]).accent }}</span>
             </h1>
 
             <p class="max-w-md text-lg text-ink-500">
-              {{ slides[current].subtitle }}
+              {{ pickByLocale(slides[current]).subtitle }}
             </p>
 
             <!-- === CTA buttons === -->
@@ -112,13 +155,13 @@ onUnmounted(stop);
                 :to="`/category/${slides[current].category}`"
                 class="rounded-md bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-primary-600/20 transition duration-200 hover:-translate-y-0.5 hover:bg-primary-700 active:scale-90"
               >
-                Shop Now
+                {{ t('hero.shopNow') }}
               </router-link>
               <router-link
                 to="/shop"
                 class="rounded-md border border-ink-200 bg-white px-6 py-3 text-sm font-semibold text-ink-700 transition duration-200 hover:-translate-y-0.5 hover:border-primary-400 hover:text-primary-600 active:scale-90"
               >
-                Explore Collection
+                {{ t('hero.exploreCollection') }}
               </router-link>
             </div>
           </div>
@@ -127,7 +170,7 @@ onUnmounted(stop);
         <div class="mt-10 flex items-center gap-3 justify-center md:justify-start">
           <button
             type="button"
-            aria-label="Previous slide"
+            :aria-label="t('hero.previousSlide')"
             class="flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-600 transition duration-200 hover:border-primary-400 hover:text-primary-600 active:scale-90"
             @click="prev"
           >
@@ -141,7 +184,7 @@ onUnmounted(stop);
           </button>
           <button
             type="button"
-            aria-label="Next slide"
+            :aria-label="t('hero.nextSlide')"
             class="flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-600 transition duration-200 hover:border-primary-400 hover:text-primary-600 active:scale-90"
             @click="next"
           >
@@ -159,7 +202,7 @@ onUnmounted(stop);
               v-for="(_, index) in slides"
               :key="index"
               type="button"
-              :aria-label="`Go to slide ${index + 1}`"
+              :aria-label="t('hero.goToSlide', { n: index + 1 })"
               class="h-2 rounded-full transition-all duration-200 active:scale-90"
               :class="index === current ? 'w-8 bg-primary-500' : 'w-2 bg-ink-200 hover:bg-ink-300'"
               @click="goTo(index)"
@@ -176,7 +219,7 @@ onUnmounted(stop);
             <img
               :key="current"
               :src="slides[current].image"
-              :alt="slides[current].tag"
+              :alt="pickByLocale(slides[current]).tag"
               class="absolute inset-0 h-full w-full object-cover"
             />
           </transition>
@@ -184,21 +227,21 @@ onUnmounted(stop);
 
           <div class="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/90 p-5 shadow-lg backdrop-blur">
             <p class="text-xs font-semibold uppercase tracking-wide text-primary-500">
-              {{ slides[current].tag }}
+              {{ pickByLocale(slides[current]).tag }}
             </p>
-            <p class="mt-1 text-lg font-bold text-ink-900">{{ slides[current].price }}</p>
+            <p class="mt-1 text-lg font-bold text-ink-900">{{ pickByLocale(slides[current]).price }}</p>
           </div>
 
           <div
             class="absolute -right-4 top-8 animate-float rounded-2xl bg-white/90 px-4 py-3 shadow-lg backdrop-blur"
           >
-            <p class="text-sm font-semibold text-ink-900">-{{ slides[current].discount }}</p>
+            <p class="text-sm font-semibold text-ink-900">-{{ pickByLocale(slides[current]).discount }}</p>
           </div>
 
           <div
             class="absolute -left-4 bottom-24 animate-float-delayed rounded-2xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg"
           >
-            {{ slides[current].pill }}
+            {{ pickByLocale(slides[current]).pill }}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useToastStore } from '../stores/toast';
@@ -7,6 +8,8 @@ import { useToastStore } from '../stores/toast';
 // ======= LOGIN PAGE (route: /login) =======
 // Realtime validation: errors appear as the user types/blurs a field.
 // Submit calls src/api/auth.js (axios client prepared for Laravel + Sanctum).
+// All labels/errors are UI chrome -> translated via i18n (auth.* keys).
+const { t } = useI18n();
 const router = useRouter();
 const auth = useAuthStore();
 const toast = useToastStore();
@@ -21,12 +24,12 @@ const touched = reactive({ email: false, password: false });
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 const emailError = computed(() => {
-  if (!email.value) return 'Email is required';
-  return isEmail(email.value) ? '' : 'Enter a valid email address';
+  if (!email.value) return t('auth.emailRequired');
+  return isEmail(email.value) ? '' : t('auth.emailInvalid');
 });
 const passwordError = computed(() => {
-  if (!password.value) return 'Password is required';
-  return password.value.length < 6 ? 'Password must be at least 6 characters' : '';
+  if (!password.value) return t('auth.passwordRequired');
+  return password.value.length < 6 ? t('auth.passwordMin') : '';
 });
 
 const hasErrors = computed(() => Boolean(emailError.value || passwordError.value));
@@ -38,7 +41,7 @@ const handleSubmit = async () => {
   touched.email = true;
   touched.password = true;
   if (hasErrors.value) {
-    toast.error('Please fix the highlighted fields');
+    toast.error(t('auth.fixFields'));
     return;
   }
 
@@ -47,10 +50,10 @@ const handleSubmit = async () => {
     // Backend not running yet — this will resolve as soon as the Laravel API
     // answers on the host from .env (see src/api/client.js).
     await auth.login({ email: email.value, password: password.value });
-    toast.success(`Welcome back, ${auth.userName || 'ly'}`);
+    toast.success(t('auth.welcomeBackToast', { name: auth.userName || ' ' }));
     router.push('/');
   } catch (error) {
-    toast.error(error.message || 'Login failed');
+    toast.error(error.message || t('auth.loginFailed'));
   } finally {
     submitting.value = false;
   }
@@ -67,15 +70,15 @@ const handleSubmit = async () => {
             <i class="pi pi-user" aria-hidden="true"></i>
           </span>
           <div>
-            <h1 class="text-2xl font-bold text-ink-900">Welcome back</h1>
-            <p class="text-sm text-ink-500">Sign in to your account</p>
+            <h1 class="text-2xl font-bold text-ink-900">{{ $t('auth.welcomeBack') }}</h1>
+            <p class="text-sm text-ink-500">{{ $t('auth.signInPrompt') }}</p>
           </div>
         </div>
 
         <form class="mt-8 space-y-5" novalidate @submit.prevent="handleSubmit">
           <!-- ======= EMAIL ======= -->
           <div>
-            <label for="login-email" class="mb-1.5 block text-sm font-medium text-ink-700">Email</label>
+            <label for="login-email" class="mb-1.5 block text-sm font-medium text-ink-700">{{ $t('auth.email') }}</label>
             <div class="relative">
               <i class="pi pi-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-ink-400" aria-hidden="true"></i>
               <input
@@ -83,7 +86,7 @@ const handleSubmit = async () => {
                 v-model="email"
                 type="email"
                 autocomplete="email"
-                placeholder="you@example.com"
+                :placeholder="$t('auth.emailPlaceholder')"
                 class="w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-ink-900 outline-none transition focus:border-primary-400"
                 :class="showError('email', emailError) ? 'border-rose-400 focus:border-rose-400' : 'border-ink-200'"
                 @blur="touched.email = true"
@@ -97,7 +100,7 @@ const handleSubmit = async () => {
 
           <!-- ======= PASSWORD ======= -->
           <div>
-            <label for="login-password" class="mb-1.5 block text-sm font-medium text-ink-700">Password</label>
+            <label for="login-password" class="mb-1.5 block text-sm font-medium text-ink-700">{{ $t('auth.password') }}</label>
             <div class="relative">
               <i class="pi pi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-ink-400" aria-hidden="true"></i>
               <input
@@ -112,7 +115,7 @@ const handleSubmit = async () => {
               />
               <button
                 type="button"
-                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :aria-label="showPassword ? $t('auth.hidePassword') : $t('auth.showPassword')"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 transition duration-200 hover:text-ink-600 active:scale-90"
                 @click="showPassword = !showPassword"
               >
@@ -131,13 +134,13 @@ const handleSubmit = async () => {
             class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <i class="pi" :class="submitting ? 'pi-spinner pi-spin' : 'pi-sign-in'" aria-hidden="true"></i>
-            {{ submitting ? 'Signing in…' : 'Sign in' }}
+            {{ submitting ? $t('auth.signingIn') : $t('auth.signIn') }}
           </button>
         </form>
 
         <p class="mt-6 text-center text-sm text-ink-500">
-          Don't have an account?
-          <RouterLink to="/register" class="font-semibold text-primary-600 hover:text-primary-700">Create one</RouterLink>
+          {{ $t('auth.noAccount') }}
+          <RouterLink to="/register" class="font-semibold text-primary-600 hover:text-primary-700">{{ $t('auth.createOne') }}</RouterLink>
         </p>
       </div>
     </div>

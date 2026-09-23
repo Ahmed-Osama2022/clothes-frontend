@@ -3,8 +3,13 @@
 // Auto-rotating reviews. SOURCE (swap point): src/data/home.js -> testimonials
 // (fields: author, role, rating, text, avatar). When the backend is up, read
 // from GET /api/home -> testimonials (see apis.md) — same shape.
+// `text` and `role` are locale-keyed ({ en, ar }) -> pickByLocale().
 import { testimonials } from '../data/home';
+import { useI18n } from 'vue-i18n';
+import { pickByLocale } from '../i18n';
 import { computed, onUnmounted, ref } from 'vue';
+
+const { t } = useI18n();
 
 const activeIndex = ref(0);
 const testimonialList = testimonials;
@@ -34,9 +39,9 @@ const stars = (rating) => '★'.repeat(rating) + '☆'.repeat(5 - rating);
   <section class="bg-snow-50 py-20">
     <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
       <p class="text-sm font-semibold uppercase tracking-wide text-primary-500" data-aos="fade-up">
-        Word on the street
+        {{ t('testimonials.eyebrow') }}
       </p>
-      <h2 class="mt-2 text-3xl font-bold text-ink-900" data-aos="fade-up">Loved by shoppers</h2>
+      <h2 class="mt-2 text-3xl font-bold text-ink-900" data-aos="fade-up">{{ t('testimonials.title') }}</h2>
 
       <!-- ======= ROTATING REVIEW =======
            Keyed on activeIndex -> re-mounts each slide, so NO data-aos here
@@ -49,12 +54,12 @@ const stars = (rating) => '★'.repeat(rating) + '☆'.repeat(5 - rating);
                 <div class="text-xl tracking-widest text-amber-400" aria-label="rating">
                   {{ stars(active.rating) }}
                 </div>
-                <blockquote class="mt-4 text-lg leading-relaxed text-ink-700">“{{ active.text }}”</blockquote>
+                <blockquote class="mt-4 text-lg leading-relaxed text-ink-700">"{{ pickByLocale(active.text) }}"</blockquote>
                 <figcaption class="mt-6 flex items-center justify-center gap-3">
                   <img :src="active.avatar" :alt="active.author" class="h-12 w-12 rounded-full object-cover" />
                   <div class="text-left">
                     <p class="font-semibold text-ink-900">{{ active.author }}</p>
-                    <p class="text-sm text-ink-500">{{ active.role }}</p>
+                    <p class="text-sm text-ink-500">{{ pickByLocale(active.role) }}</p>
                   </div>
                 </figcaption>
               </div>
@@ -68,7 +73,7 @@ const stars = (rating) => '★'.repeat(rating) + '☆'.repeat(5 - rating);
             v-for="(t, index) in testimonialList"
             :key="t.author"
             type="button"
-            :aria-label="`Show review from ${t.author}`"
+            :aria-label="$t('testimonials.showReview', { author: t.author })"
             class="transition duration-200 active:scale-90"
             :class="
               index === activeIndex
