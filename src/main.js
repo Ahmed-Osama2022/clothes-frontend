@@ -7,6 +7,10 @@ import './assets/main.css';
 // ======= PRIMEICONS =======
 // Global icon font (usage: <i class="pi pi-cart-plus"></i>). See https://primeng.org/icons
 import 'primeicons/primeicons.css';
+// ======= NPROGRESS =======
+// Slim top route-progress bar. Package CSS (its own file, like AOS CSS).
+// Bar color is themed to the shop purple in App.vue's global <style>.
+import 'nprogress/nprogress.css';
 
 const app = createApp(App);
 const pinia = createPinia();

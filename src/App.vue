@@ -70,4 +70,17 @@ onUnmounted(() => {
     transform: none !important;
   }
 }
+
+/* ======= NPROGRESS ROUTE BAR THEME =======
+   Theme the slim top progress bar to the shop purple (primary-600). Spinner is
+   already off (configured in src/router/index.js). */
+#nprogress .bar {
+  background: #9333ea;
+}
+
+#nprogress .peg {
+  box-shadow:
+    0 0 10px #9333ea,
+    0 0 5px #9333ea;
+}
 </style>

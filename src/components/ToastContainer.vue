@@ -1,12 +1,10 @@
 <script setup>
-import { useI18n } from 'vue-i18n';
 import { useToastStore } from '../stores/toast';
 
 // ======= GLOBAL TOASTS =======
 // Rendered once from App.vue. Shows success/error/info messages pushed by
 // useToastStore(). Toasts are re-keyed, so they animate via Vue <transition-group>
 // (never data-aos on these).
-const { t } = useI18n();
 const toast = useToastStore();
 
 const iconFor = (type) => ({
@@ -41,7 +39,7 @@ const iconColorFor = (type) => ({
         <p class="flex-1 text-sm font-medium">{{ t.message }}</p>
         <button
           type="button"
-          :aria-label="t('toast.dismiss')"
+          :aria-label="$t('toast.dismiss')"
           class="rounded-md p-1 text-lg opacity-60 transition duration-200 hover:opacity-100 active:scale-90"
           @click="toast.dismiss(t.id)"
         >

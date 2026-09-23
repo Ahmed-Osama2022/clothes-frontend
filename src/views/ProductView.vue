@@ -6,12 +6,18 @@ import { categories, products } from '../data/catalog';
 import { useCartStore } from '../stores/cart';
 import { useToastStore } from '../stores/toast';
 import ProductCard from '../components/ProductCard.vue';
+import ProductCardSkeleton from '../components/skeletons/ProductCardSkeleton.vue';
+import SkeletonBlock from '../components/skeletons/SkeletonBlock.vue';
 import { pickByLocale } from '../i18n';
 
 // ======= SINGLE PRODUCT PAGE (route: /product/:id) =======
 // Reads the :id param from the URL and pulls the product from src/data/catalog.js.
 // Unknown ids render the 'not found' state.
 // Product/category text is locale-keyed ({ en, ar }) -> pickByLocale.
+// ======= LOADING STATE =======
+// Sync today; flip `loading` true when this fetches GET /api/products/{id}
+// (+ related, see apis.md) so the detail + related skeletons show first.
+const loading = ref(false);
 const { t } = useI18n();
 const route = useRoute();
 const cart = useCartStore();
@@ -19,12 +25,13 @@ const toast = useToastStore();
 
 const product = computed(() => products.find((p) => p.id === Number(route.params.id)));
 const category = computed(() => (product.value ? categories[product.value.category] : null));
-const localizedProduct = computed(() => (product.value ? pickByLocale(product.value) : null));
+// Products have `name` as a nested locale map ({ en, ar }) — resolve that field.
+const localizedName = computed(() => (product.value ? pickByLocale(product.value.name) : ''));
 const localizedCategory = computed(() => (category.value ? pickByLocale(category.value) : null));
 
 const description = computed(() =>
   product.value
-    ? `${pickByLocale(product.value).name} is part of the ${localizedCategory.value?.title || 'collection'} — designed to be versatile, comfortable and easy to style for everyday wear.`
+    ? `${localizedName.value} is part of the ${localizedCategory.value?.title || 'collection'} — designed to be versatile, comfortable and easy to style for everyday wear.`
     : ''
 );
 
@@ -42,8 +49,8 @@ const changeQty = (delta) => {
 
 const addToCart = () => {
   // Store the locally-resolved name snapshot in the cart (like a DB row).
-  cart.add({ ...product.value, name: pickByLocale(product.value).name }, qty.value);
-  toast.success(t('product.addedToCart', { name: pickByLocale(product.value).name }));
+  cart.add({ ...product.value, name: localizedName.value }, qty.value);
+  toast.success(t('product.addedToCart', { name: localizedName.value }));
   qty.value = 1;
 };
 
@@ -57,21 +64,42 @@ const features = [
 
 <template>
   <main>
-    <!-- ======= PRODUCT NOT FOUND ======= -->
-    <div v-if="!product" class="mx-auto max-w-7xl px-4 py-24 text-center" data-aos="fade-up">
-      <i class="pi pi-tag text-5xl text-ink-300" aria-hidden="true"></i>
-      <h1 class="mt-4 text-2xl font-bold text-ink-900">{{ $t('product.notFound') }}</h1>
-      <p class="mt-2 text-sm text-ink-500">{{ $t('product.notFoundHint') }}</p>
-      <RouterLink
-        to="/shop"
-        class="mt-6 inline-block rounded-md bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition duration-200 hover:bg-primary-700 active:scale-90"
-      >
-        {{ $t('product.browseShop') }}
-      </RouterLink>
-    </div>
+    <!-- ======= PRODUCT DETAIL SKELETON (while loading from API) ======= -->
+      <section v-if="loading" class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <SkeletonBlock class="mb-6 h-4 w-56" />
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
+          <SkeletonBlock class="aspect-[4/5] w-full rounded-3xl" />
+          <div class="flex flex-col justify-center space-y-4">
+            <SkeletonBlock class="h-5 w-32" />
+            <SkeletonBlock class="h-10 w-3/4" />
+            <SkeletonBlock class="h-4 w-40" />
+            <SkeletonBlock class="h-9 w-28" />
+            <SkeletonBlock class="h-5 w-full" />
+            <SkeletonBlock class="h-5 w-5/6" />
+            <SkeletonBlock class="h-5 w-2/3" />
+            <div class="flex gap-4 pt-2">
+              <SkeletonBlock class="h-11 w-32" />
+              <SkeletonBlock class="h-11 w-44" />
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <!-- ======= PRODUCT DETAIL ======= -->
-    <template v-else>
+      <!-- ======= PRODUCT NOT FOUND ======= -->
+      <div v-else-if="!product" class="mx-auto max-w-7xl px-4 py-24 text-center" data-aos="fade-up">
+        <i class="pi pi-tag text-5xl text-ink-300" aria-hidden="true"></i>
+        <h1 class="mt-4 text-2xl font-bold text-ink-900">{{ $t('product.notFound') }}</h1>
+        <p class="mt-2 text-sm text-ink-500">{{ $t('product.notFoundHint') }}</p>
+        <RouterLink
+          to="/shop"
+          class="mt-6 inline-block rounded-md bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition duration-200 hover:bg-primary-700 active:scale-90"
+        >
+          {{ $t('product.browseShop') }}
+        </RouterLink>
+      </div>
+
+      <!-- ======= PRODUCT DETAIL ======= -->
+      <template v-else>
       <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <nav class="mb-6 text-sm text-ink-500" data-aos="fade-up">
           <RouterLink to="/" class="hover:text-primary-600">{{ $t('product.home') }}</RouterLink>
@@ -80,7 +108,7 @@ const features = [
             {{ localizedCategory?.title }}
           </RouterLink>
           <span class="mx-2 text-ink-300">/</span>
-          <span class="font-medium text-ink-900">{{ localizedProduct.name }}</span>
+          <span class="font-medium text-ink-900">{{ localizedName }}</span>
         </nav>
 
         <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
@@ -88,7 +116,7 @@ const features = [
           <div class="relative overflow-hidden rounded-3xl bg-white shadow-sm" data-aos="fade-up">
             <img
               :src="product.image"
-              :alt="localizedProduct.name"
+              :alt="localizedName"
               class="aspect-[4/5] w-full object-cover"
             />
           </div>
@@ -99,7 +127,7 @@ const features = [
               <i class="pi pi-tag" aria-hidden="true"></i>
               {{ localizedCategory?.eyebrow }}
             </p>
-            <h1 class="mt-2 text-3xl font-bold text-ink-900 sm:text-4xl">{{ localizedProduct.name }}</h1>
+            <h1 class="mt-2 text-3xl font-bold text-ink-900 sm:text-4xl">{{ localizedName }}</h1>
 
             <div class="mt-3 flex items-center gap-2 text-sm text-ink-500">
               <span class="flex items-center gap-0.5 text-amber-400">

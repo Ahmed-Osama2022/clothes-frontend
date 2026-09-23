@@ -7,6 +7,7 @@ import { useToastStore } from '../stores/toast';
 import { useLocaleStore } from '../stores/locale';
 import { getHomeData } from '../api/home';
 import LocaleSwitcher from './LocaleSwitcher.vue';
+import SkeletonBlock from './skeletons/SkeletonBlock.vue';
 
 const { t } = useI18n();
 const isOpen = ref(false);
@@ -326,7 +327,17 @@ const checkout = () => {
                from shop categories. -->
           <div class="mt-2 border-t border-ink-100 pt-3">
             <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-ink-400">{{ t('nav.categories') }}</p>
-            <p v-if="isCategoriesLoading" class="px-3 py-2.5 text-sm text-ink-400">{{ t('nav.loadingCategories') }}</p>
+            <div
+              v-if="isCategoriesLoading"
+              role="status"
+              aria-live="polite"
+              class="space-y-3 px-3 py-2.5"
+            >
+              <!-- ======= CATEGORIES LOADING SKELETON (replaces the old plain-text loader) ======= -->
+              <SkeletonBlock class="h-4 w-3/4" />
+              <SkeletonBlock class="h-4 w-1/2" />
+              <SkeletonBlock class="h-4 w-2/3" />
+            </div>
             <RouterLink
               v-for="cat in categories"
               :key="cat.slug"

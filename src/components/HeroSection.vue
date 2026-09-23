@@ -2,8 +2,15 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { pickByLocale } from '../i18n';
+import HeroSkeleton from './skeletons/HeroSkeleton.vue';
 
 const { t } = useI18n();
+
+// ======= LOADING STATE =======
+// Slides are hardcoded today (sync). When this component switches to fetching
+// GET /api/home -> hero (see apis.md), set `loading` true while awaiting and the
+// HeroSkeleton shows in its place via the v-if/v-else in the template.
+const loading = ref(false);
 
 const slides = [
   // ======= EDIT HERO SLIDES HERE =======
@@ -126,7 +133,14 @@ onUnmounted(stop);
     ></div>
     <div class="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-ink-100 blur-3xl"></div>
 
-    <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
+    <!-- ======= HERO CONTENT =======
+         HeroSkeleton shows while `loading` (async /api/home swap); the carousel
+         renders once slides are available. Never data-aos on this transition. -->
+    <div class="relative">
+      <transition name="hero-fade" mode="out-in">
+        <HeroSkeleton v-if="loading" key="hero-loading" class="mx-auto" />
+
+        <div v-else key="hero-content" class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
       <div class="relative">
         <transition name="slide" mode="out-in">
           <div :key="current" class="space-y-6">
@@ -245,11 +259,30 @@ onUnmounted(stop);
           </div>
         </div>
       </div>
+      </div>
+      </transition>
     </div>
   </section>
 </template>
 
 <style scoped>
+.hero-fade-enter-active,
+.hero-fade-leave-active {
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.hero-fade-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.hero-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+
 .slide-enter-active,
 .slide-leave-active {
   transition:

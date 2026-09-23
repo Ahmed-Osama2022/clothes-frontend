@@ -6,6 +6,7 @@ export default {
   brand: 'محل ملابس',
   lang: { en: 'English', ar: 'العربية' },
   toast: { dismiss: 'إغلاق الإشعار' },
+  loading: { placeholder: 'جارٍ تحميل المحتوى…' },
   nav: {
     home: 'الرئيسية',
     shop: 'المتجر',

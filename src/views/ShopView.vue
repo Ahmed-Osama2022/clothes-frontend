@@ -2,11 +2,16 @@
 import { computed, ref } from 'vue';
 import { categories, products } from '../data/catalog';
 import ProductCard from '../components/ProductCard.vue';
+import ProductCardSkeleton from '../components/skeletons/ProductCardSkeleton.vue';
 import { pickByLocale } from '../i18n';
 
 // ======= SHOP PAGE STATE =======
 // Filters by category ('all' shows everything) + sorts the grid.
 // Sort options: recommended | price-low | price-high | name
+// ======= LOADING STATE =======
+// Products are sync from catalog.js today. When this swaps to GET /api/products
+// (see apis.md), flip `loading` true while fetching -> skeleton grid shows.
+const loading = ref(false);
 const active = ref('all');
 const sort = ref('recommended');
 
@@ -97,8 +102,19 @@ const sortedAndFiltered = computed(() => {
            (see the .fade-swap rules in <style scoped>). Logical content animates
            via this Vue transition, so no data-aos here. -->
       <transition name="fade-swap" mode="out-in">
+        <!-- ======= SKELETON GRID (while products load from the API) ======= -->
         <div
-          v-if="sortedAndFiltered.length"
+          v-if="loading"
+          key="shop-loading"
+          role="status"
+          aria-live="polite"
+          class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <ProductCardSkeleton v-for="n in 8" :key="n" />
+        </div>
+
+        <div
+          v-else-if="sortedAndFiltered.length"
           :key="`${active}-${sort}`"
           class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
         >

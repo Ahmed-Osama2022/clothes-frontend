@@ -2,6 +2,8 @@
 import { computed, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { pickByLocale } from '../i18n';
+import SectionHeaderSkeleton from './skeletons/SectionHeaderSkeleton.vue';
+import SkeletonBlock from './skeletons/SkeletonBlock.vue';
 
 // ======= PROMO SPLIT-BANNER + COUNTDOWN (home) =======
 // Full-width split: image + headline + live countdown to promo.ends_at.
@@ -9,6 +11,11 @@ import { pickByLocale } from '../i18n';
 // up, fetch GET /api/home -> promo (see apis.md) and replace this object.
 // Content is locale-keyed: { en: {...}, ar: {...} } — picked by active locale.
 const { t } = useI18n();
+
+// ======= LOADING STATE =======
+// Sync today; flip `loading` true when `promo` is fetched from the API
+// (GET /api/home -> promo, apis.md) so the skeleton shows first.
+const loading = ref(false);
 
 const promo = {
   image:
@@ -51,10 +58,23 @@ const units = computed(() => {
 <template>
   <!-- ======= PROMO BANNER ======= -->
   <section class="relative overflow-hidden">
-    <img :src="promo.image" :alt="pickByLocale(promo).title" class="absolute inset-0 h-full w-full object-cover" />
-    <div class="absolute inset-0 bg-ink-950/65"></div>
+    <template v-if="loading">
+      <SkeletonBlock class="absolute inset-0 h-full w-full" />
+      <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 py-20 text-center text-white sm:px-6 lg:px-8 md:py-24">
+        <SectionHeaderSkeleton center class="mx-auto" />
+        <SkeletonBlock class="mt-4 h-4 w-2/3 max-w-sm" />
+        <div class="flex gap-3 sm:gap-4">
+          <SkeletonBlock v-for="n in 4" :key="n" class="h-20 w-16 rounded-xl" />
+        </div>
+        <SkeletonBlock class="h-11 w-44" />
+      </div>
+    </template>
 
-    <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 py-20 text-center text-white sm:px-6 lg:px-8 md:py-24" data-aos="fade-up">
+    <template v-else>
+      <img :src="promo.image" :alt="pickByLocale(promo).title" class="absolute inset-0 h-full w-full object-cover" />
+      <div class="absolute inset-0 bg-ink-950/65"></div>
+
+      <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 py-20 text-center text-white sm:px-6 lg:px-8 md:py-24" data-aos="fade-up">
       <p class="rounded-full bg-primary-600 px-4 py-1.5 text-sm font-semibold uppercase tracking-wide">
         {{ pickByLocale(promo).title }}
       </p>
@@ -76,6 +96,7 @@ const units = computed(() => {
         {{ pickByLocale(promo).cta.label }}
         <i class="pi pi-arrow-right rtl:rotate-180" aria-hidden="true"></i>
       </RouterLink>
-    </div>
+      </div>
+      </template>
   </section>
 </template>

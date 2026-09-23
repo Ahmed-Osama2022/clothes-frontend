@@ -38,11 +38,16 @@ export default {
       animation: {
         float: 'float 6s ease-in-out infinite',
         'float-delayed': 'float 6s ease-in-out 3s infinite',
+        shimmer: 'shimmer 1.6s linear infinite',
       },
       keyframes: {
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-14px)' },
+        },
+        shimmer: {
+          '0%': { 'background-position': '200% 0' },
+          '100%': { 'background-position': '-200% 0' },
         },
       },
     },

@@ -6,6 +6,7 @@ export default {
   brand: 'Clothes Shop',
   lang: { en: 'English', ar: 'العربية' },
   toast: { dismiss: 'Dismiss notification' },
+  loading: { placeholder: 'Loading content…' },
   nav: {
     home: 'Home',
     shop: 'Shop',
