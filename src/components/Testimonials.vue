@@ -1,22 +1,14 @@
 <script setup>
-// ======= TESTIMONIALS CAROUSEL (home) =======
-// Auto-rotating reviews. SOURCE (swap point): src/data/home.js -> testimonials
-// (fields: author, role, rating, text, avatar). When the backend is up, read
-// from GET /api/home -> testimonials (see apis.md) — same shape.
-// `text` and `role` are locale-keyed ({ en, ar }) -> pickByLocale().
-import { testimonials } from '../data/home';
+import { computed, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { pickByLocale } from '../i18n';
-import { computed, onUnmounted, ref } from 'vue';
-import SectionHeaderSkeleton from './skeletons/SectionHeaderSkeleton.vue';
-import SkeletonBlock from './skeletons/SkeletonBlock.vue';
+import { testimonials } from '../data/site';
 
+// ======= TESTIMONIALS CAROUSEL (home) =======
+// EDITORIAL content: no API endpoint for testimonials yet, so the reviews live in
+// src/data/site.js -> testimonials (author, rating, avatar, locale-keyed role/text).
+// TODO(api): swap for GET /home -> data.testimonials when it ships.
 const { t } = useI18n();
-
-// ======= LOADING STATE =======
-// Sync today; flip `loading` true when testimonials come from GET /api/home
-// (see apis.md) so the header + review-bubble skeletons show first.
-const loading = ref(false);
 
 const activeIndex = ref(0);
 const testimonialList = testimonials;
@@ -42,43 +34,22 @@ const stars = (rating) => '★'.repeat(rating) + '☆'.repeat(5 - rating);
 </script>
 
 <template>
-  <!-- ======= TESTIMONIALS ======= -->
+  <!-- ======= TESTIMONIALS =======
+       Content: src/data/site.js -> testimonials (edit reviews there).
+       Dots switch reviews; auto-rotation pauses only when the tab is closed. -->
   <section class="bg-snow-50 py-20">
     <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-      <SectionHeaderSkeleton v-if="loading" center class="mx-auto" />
-      <template v-else>
-        <p class="text-sm font-semibold uppercase tracking-wide text-primary-500" data-aos="fade-up">
-          {{ t('testimonials.eyebrow') }}
-        </p>
-        <h2 class="mt-2 text-3xl font-bold text-ink-900" data-aos="fade-up">{{ t('testimonials.title') }}</h2>
-      </template>
+      <p class="text-sm font-semibold uppercase tracking-wide text-primary-500" data-aos="fade-up">
+        {{ t('testimonials.eyebrow') }}
+      </p>
+      <h2 class="mt-2 text-3xl font-bold text-ink-900" data-aos="fade-up">{{ t('testimonials.title') }}</h2>
 
       <!-- ======= ROTATING REVIEW =======
            Keyed on activeIndex -> re-mounts each slide, so NO data-aos here
            (AOS would freeze it at opacity:0). Use Vue <transition> instead. -->
       <div class="relative mt-12">
         <div class="overflow-hidden">
-          <!-- ======= REVIEW SKELETON (while loading) ======= -->
-          <div v-if="loading" class="mx-auto max-w-2xl rounded-2xl bg-white p-8 shadow-sm sm:p-10">
-            <div class="mx-auto w-40">
-              <SkeletonBlock class="h-4 w-full" />
-            </div>
-            <SkeletonBlock class="mx-auto mt-4 h-6 w-3/4 rounded" />
-            <SkeletonBlock class="mx-auto mt-3 h-6 w-2/3 rounded" />
-            <div class="mt-6 flex items-center justify-center gap-3">
-              <SkeletonBlock circle class="h-12 w-12" />
-              <div class="space-y-2 text-left">
-                <SkeletonBlock class="h-4 w-28" />
-                <SkeletonBlock class="h-3 w-20" />
-              </div>
-            </div>
-            <div class="mt-8 flex justify-center gap-2">
-              <SkeletonBlock class="h-2.5 w-8 rounded-full" />
-              <SkeletonBlock v-for="n in 2" :key="n" circle class="h-2.5 w-2.5" />
-            </div>
-          </div>
-
-          <Transition v-else name="slide" mode="out-in">
+          <Transition name="slide" mode="out-in">
             <figure :key="activeIndex" class="mx-auto max-w-2xl px-2">
               <div class="rounded-2xl bg-white p-8 shadow-sm sm:p-10">
                 <div class="text-xl tracking-widest text-amber-400" aria-label="rating">
@@ -100,10 +71,10 @@ const stars = (rating) => '★'.repeat(rating) + '☆'.repeat(5 - rating);
         <!-- ======= DOTS ======= -->
         <div class="mt-8 flex justify-center gap-2">
           <button
-            v-for="(t, index) in testimonialList"
-            :key="t.author"
+            v-for="(item, index) in testimonialList"
+            :key="item.author"
             type="button"
-            :aria-label="$t('testimonials.showReview', { author: t.author })"
+            :aria-label="$t('testimonials.showReview', { author: item.author })"
             class="transition duration-200 active:scale-90"
             :class="
               index === activeIndex

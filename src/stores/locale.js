@@ -4,10 +4,11 @@ import { applyLocale, DEFAULT_LOCALE, i18n, LOCALE_STORAGE_KEY, RTL_LOCALES, SUP
 // ======= LOCALE STORE =======
 // Holds the active locale, persists the user's choice to localStorage, and
 // applies it app-wide (vue-i18n composer + <html lang>/dir = RTL for Arabic).
-// UI chrome re-renders via vue-i18n reactivity; DATA content (categories,
-// products, promo, testimonials) re-renders via pickByLocale() which reads the
-// same active locale — changing locale here updates the whole app, shops and
-// all. The store is the single source of truth after app boot.
+// UI chrome re-renders via vue-i18n reactivity. Catalog text (categories,
+// products, variant colors) is refetched from the API with `?lang=` when this
+// changes, and editorial content (src/data/site.js) re-renders via
+// pickByLocale() which reads the same active locale. The store is the single
+// source of truth after app boot.
 export const useLocaleStore = defineStore('locale', {
   state: () => ({
     // Initialized by src/i18n/index.js (localStorage -> browser -> .env default)

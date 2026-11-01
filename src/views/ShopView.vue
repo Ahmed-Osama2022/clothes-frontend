@@ -1,50 +1,94 @@
 <script setup>
-import { computed, ref } from 'vue';
-import { categories, products } from '../data/catalog';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useCatalogStore } from '../stores/catalog';
 import ProductCard from '../components/ProductCard.vue';
 import ProductCardSkeleton from '../components/skeletons/ProductCardSkeleton.vue';
-import { pickByLocale } from '../i18n';
+import Pagination from '../components/Pagination.vue';
+import ErrorState from '../components/ErrorState.vue';
 
-// ======= SHOP PAGE STATE =======
-// Filters by category ('all' shows everything) + sorts the grid.
-// Sort options: recommended | price-low | price-high | name
-// ======= LOADING STATE =======
-// Products are sync from catalog.js today. When this swaps to GET /api/products
-// (see apis.md), flip `loading` true while fetching -> skeleton grid shows.
-const loading = ref(false);
-const active = ref('all');
+// ======= SHOP PAGE =======
+// Data: stores/catalog.js -> GET /products?lang=...
+// The MVP API returns the WHOLE catalog with no filters/sort/pagination, so
+// search, category filtering, sorting and paging are done client-side here.
+// When the API grows query support, move these computeds into api/catalog.js.
+const { t } = useI18n();
+const catalog = useCatalogStore();
+
+const PER_PAGE = 12;
+
+const search = ref('');
+const active = ref('all'); // category slug or 'all'
 const sort = ref('recommended');
+const page = ref(1);
+
+onMounted(() => catalog.load());
+
+const loading = computed(() => catalog.loading && !catalog.hasData);
+const failed = computed(() => Boolean(catalog.error) && !catalog.hasData);
 
 const filters = computed(() => [
-  { slug: 'all', labelKey: 'shop.all' },
-  ...Object.keys(categories).map((slug) => ({ slug, label: pickByLocale(categories[slug]).title })),
+  { slug: 'all', label: t('shop.all') },
+  ...catalog.categories.map((category) => ({ slug: category.slug, label: category.title })),
 ]);
 
-const sortedAndFiltered = computed(() => {
-  let list = active.value === 'all' ? [...products] : products.filter((p) => p.category === active.value);
+// Search -> category -> sort, in that order (search narrows everything else).
+const filtered = computed(() => {
+  const term = search.value.trim().toLowerCase();
+  let list = catalog.products;
+
+  if (active.value !== 'all') {
+    list = list.filter((product) => product.category === active.value);
+  }
+
+  if (term) {
+    list = list.filter((product) =>
+      [product.name, product.baseName, product.description, product.categoryName]
+        .join(' ')
+        .toLowerCase()
+        .includes(term),
+    );
+  }
 
   switch (sort.value) {
     case 'price-low':
-      list.sort((a, b) => a.price - b.price);
-      break;
+      return [...list].sort((a, b) => a.price - b.price);
     case 'price-high':
-      list.sort((a, b) => b.price - a.price);
-      break;
+      return [...list].sort((a, b) => b.price - a.price);
     case 'name':
-      list.sort((a, b) => pickByLocale(a.name).localeCompare(pickByLocale(b.name)));
-      break;
+      return [...list].sort((a, b) => a.name.localeCompare(b.name));
     default:
-      break;
+      return list;
   }
-  return list;
 });
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / PER_PAGE)));
+const visible = computed(() => {
+  const start = (page.value - 1) * PER_PAGE;
+  return filtered.value.slice(start, start + PER_PAGE);
+});
+
+// Any filter change restarts at page 1; a shrinking list clamps the page.
+watch([active, sort, search], () => {
+  page.value = 1;
+});
+watch(totalPages, (total) => {
+  if (page.value > total) page.value = total;
+});
+
+const isFiltered = computed(() => active.value !== 'all' || search.value.trim() !== '');
+const clearFilters = () => {
+  active.value = 'all';
+  search.value = '';
+  sort.value = 'recommended';
+};
 </script>
 
 <template>
   <!-- ======= SHOP / FULL CATALOG PAGE ========
-       Route: /shop (defined in src/router/index.js).
-       - Products + categories come from src/data/catalog.js — edit them there.
-       - 'Explore Collection' in the hero + the Navbar 'Shop' link point here. -->
+       Route: /shop (src/router/index.js). Products + categories come from the
+       Laravel API through stores/catalog.js — nothing is hardcoded here.
+       Search / sort / category chips / pagination are client-side for now. -->
   <main>
     <section class="bg-gradient-to-r from-ink-900 via-ink-800 to-primary-900 py-16 text-white">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-aos="fade-up">
@@ -57,12 +101,9 @@ const sortedAndFiltered = computed(() => {
     </section>
 
     <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div
-        class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
-        data-aos="fade-up"
-      >
+      <!-- ======= FILTER / SEARCH / SORT BAR ======= -->
+      <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between" data-aos="fade-up">
         <div class="flex flex-wrap items-center gap-2">
-          <!-- ======= CATEGORY FILTER CHIPS ======= -->
           <button
             v-for="filter in filters"
             :key="filter.slug"
@@ -75,34 +116,56 @@ const sortedAndFiltered = computed(() => {
             "
             @click="active = filter.slug"
           >
-            {{ filter.labelKey ? $t(filter.labelKey) : filter.label }}
+            {{ filter.label }}
           </button>
         </div>
 
-        <label class="flex items-center gap-2 text-sm text-ink-500">
-          {{ $t('shop.sortBy') }}
-          <select
-            v-model="sort"
-            class="cursor-pointer rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm font-medium text-ink-700 outline-none transition focus:border-primary-400"
-          >
-            <option value="recommended">{{ $t('shop.recommended') }}</option>
-            <option value="price-low">{{ $t('shop.priceLow') }}</option>
-            <option value="price-high">{{ $t('shop.priceHigh') }}</option>
-            <option value="name">{{ $t('shop.name') }}</option>
-          </select>
-        </label>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <!-- ======= SEARCH (client-side; API has no ?search= yet) ======= -->
+          <label class="relative flex items-center">
+            <span class="sr-only">{{ $t('shop.search') }}</span>
+            <i class="pi pi-search absolute left-3 text-sm text-ink-400" aria-hidden="true"></i>
+            <input
+              v-model="search"
+              type="search"
+              :placeholder="$t('shop.searchPlaceholder')"
+              class="w-full rounded-lg border border-ink-200 bg-white py-2 pl-9 pr-3 text-sm text-ink-900 outline-none transition focus:border-primary-400 sm:w-56"
+            />
+          </label>
+
+          <label class="flex items-center gap-2 text-sm text-ink-500">
+            {{ $t('shop.sortBy') }}
+            <select
+              v-model="sort"
+              class="cursor-pointer rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm font-medium text-ink-700 outline-none transition focus:border-primary-400"
+            >
+              <option value="recommended">{{ $t('shop.recommended') }}</option>
+              <option value="price-low">{{ $t('shop.priceLow') }}</option>
+              <option value="price-high">{{ $t('shop.priceHigh') }}</option>
+              <option value="name">{{ $t('shop.name') }}</option>
+            </select>
+          </label>
+        </div>
       </div>
 
-      <p class="mb-6 text-sm text-ink-500" data-aos="fade-up">
-        {{ $t('shop.items', { count: sortedAndFiltered.length }) }}
+      <!-- ======= RESULTS COUNT ======= -->
+      <p v-if="!loading && !failed" class="mb-6 text-sm text-ink-500" data-aos="fade-up">
+        {{ $t('shop.items', { count: filtered.length }) }}
       </p>
 
-      <!-- ======= GRID ANIMATION =======
-           Re-keyed on category/sort change so the listing fades + slides in
-           (see the .fade-swap rules in <style scoped>). Logical content animates
-           via this Vue transition, so no data-aos here. -->
-      <transition name="fade-swap" mode="out-in">
-        <!-- ======= SKELETON GRID (while products load from the API) ======= -->
+      <!-- ======= ERROR (slow/broken connection) =======
+           Until the shop can be reached this is a "temporarily unavailable"
+           state with auto-retry — NOT the 404 page. -->
+      <ErrorState
+        v-if="failed"
+        :message="catalog.error.message"
+        :offline="catalog.isUnavailable"
+        :auto-retry="catalog.isUnavailable ? 15 : 0"
+        @retry="catalog.retry()"
+      />
+
+      <transition v-else name="fade-swap" mode="out-in">
+        <!-- ======= SKELETON GRID ======= -->
         <div
           v-if="loading"
           key="shop-loading"
@@ -113,25 +176,32 @@ const sortedAndFiltered = computed(() => {
           <ProductCardSkeleton v-for="n in 8" :key="n" />
         </div>
 
-        <div
-          v-else-if="sortedAndFiltered.length"
-          :key="`${active}-${sort}`"
-          class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          <ProductCard
-            v-for="product in sortedAndFiltered"
-            :key="product.id"
-            :product="product"
-          />
+        <div v-else-if="visible.length" :key="`${active}-${sort}-${page}-${search}`">
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <ProductCard v-for="product in visible" :key="product.id" :product="product" />
+          </div>
+
+          <!-- ======= PAGINATION (client-side over the full catalog) ======= -->
+          <Pagination :page="page" :total-pages="totalPages" @update:page="page = $event" />
         </div>
 
-        <div
-          v-else
-          :key="`empty-${active}-${sort}`"
-          class="py-20 text-center"
-        >
-          <p class="text-2xl font-semibold text-ink-900">{{ $t('shop.emptyTitle') }}</p>
-          <p class="mt-2 text-sm text-ink-500">{{ $t('shop.emptyHint') }}</p>
+        <!-- ======= EMPTY STATE ======= -->
+        <div v-else key="shop-empty" class="py-20 text-center">
+          <i class="pi pi-search text-4xl text-ink-300" aria-hidden="true"></i>
+          <p class="mt-4 text-2xl font-semibold text-ink-900">
+            {{ isFiltered ? $t('shop.noResultsTitle') : $t('shop.emptyTitle') }}
+          </p>
+          <p class="mt-2 text-sm text-ink-500">
+            {{ isFiltered ? $t('shop.noResultsHint') : $t('shop.emptyHint') }}
+          </p>
+          <button
+            v-if="isFiltered"
+            type="button"
+            class="mt-5 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-primary-700 active:scale-90"
+            @click="clearFilters"
+          >
+            {{ $t('common.clearFilters') }}
+          </button>
         </div>
       </transition>
     </section>

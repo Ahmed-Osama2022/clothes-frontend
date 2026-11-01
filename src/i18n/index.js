@@ -4,10 +4,10 @@ import ar from './locales/ar.js';
 
 // ======= I18N CORE =======
 // Frontend tier: UI chrome strings (nav, buttons, labels, validation messages)
-// live in this module via vue-i18n. DATA content (categories, products, promo,
-// testimonials, hero slides) is locale-keyed in src/data/*.js and picked with
-// `pickByLocale` — mirroring how the Laravel backend will serve translated rows
-// keyed by a `locale` param (see apis.md).
+// live in this module via vue-i18n. Catalog content (categories, products,
+// variants) comes from the Laravel API already localized via `?lang=`. The only
+// local data-tier content is editorial (src/data/site.js: hero, promo,
+// testimonials, category eyebrows), picked with `pickByLocale`.
 
 export const SUPPORTED_LOCALES = ['en', 'ar'];
 // Default locale comes from .env (VITE_DEFAULT_LOCALE). Used only when the user

@@ -3,6 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 import Navbar from './components/Navbar.vue'
+import ConnectivityBanner from './components/ConnectivityBanner.vue'
 import ToastContainer from './components/ToastContainer.vue'
 import router from './router'
 
@@ -45,9 +46,12 @@ onUnmounted(() => {
   <!-- ======= GLOBAL APP LAYOUT =======
        Everything here shows on every page.
        - Navbar is the site-wide header (edit it in components/Navbar.vue)
+       - ConnectivityBanner appears only when the API refresh fails and the
+         last-good catalog is being shown (degraded mode, never fake data)
        - router-view renders the page for the current route -->
   <div class="min-h-screen bg-snow-100">
     <Navbar />
+    <ConnectivityBanner />
     <router-view />
     <!-- ======= GLOBAL TOASTS =======
          Renders success/error notifications from stores/toast.js. -->

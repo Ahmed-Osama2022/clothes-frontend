@@ -1,17 +1,37 @@
 // ======= ENGLISH MESSAGES (default locale) =======
-// UI chrome lives here (frontend tier). DATA content (categories, products,
-// promo, testimonials, hero slides) is locale-keyed in src/data/*.js and served
-// like a backend would (apid).
+// UI chrome lives here (frontend tier). Catalog content (categories, products,
+// variants) comes from the Laravel API already localized via `?lang=en`.
+// Editorial content (hero, promo, testimonials) lives in src/data/site.js.
 export default {
   brand: 'Clothes Shop',
   lang: { en: 'English', ar: 'العربية' },
   toast: { dismiss: 'Dismiss notification' },
   loading: { placeholder: 'Loading content…' },
+  // ======= SHARED STATES (errors, retry, empty filters) =======
+  common: {
+    errorTitle: 'Something went wrong',
+    errorHint: 'We could not load this content. Check your connection and try again.',
+    retry: 'Try again',
+    clearFilters: 'Clear filters',
+    // ======= DEGRADED MODE (backend unreachable, never fake data) =======
+    offlineTitle: 'Store temporarily unavailable',
+    offlineHint: "We can't reach the shop right now. Check your connection — we'll retry automatically.",
+    retryingIn: 'Retrying in {seconds}s',
+    staleTitle: 'Showing saved data.',
+    staleNotice: 'The shop is offline, so prices and stock may be out of date.',
+  },
+  // ======= NETWORK / API ERRORS (src/api/client.js) =======
+  errors: {
+    network: 'Network error — please check your connection.',
+    timeout: 'The request took too long. Please try again.',
+    server: 'The server is having trouble. Please try again shortly.',
+    generic: 'Something went wrong. Please try again.',
+    notFound: 'We could not find what you were looking for.',
+  },
   nav: {
     home: 'Home',
     shop: 'Shop',
     about: 'About',
-    testCard: 'Test Card',
     login: 'Login',
     register: 'Register',
     openCart: 'Open your cart',
@@ -27,8 +47,8 @@ export default {
     size: 'Size',
     checkout: 'Checkout',
     categories: 'Categories',
-    loadingCategories: 'Loading categories…',
     checkoutSoon: 'Checkout is coming soon',
+    checkoutUnavailable: 'Checkout is unavailable while the shop is offline.',
   },
   announcement: {
     freeShipping: 'Free shipping on orders over $50',
@@ -69,6 +89,8 @@ export default {
     title: 'Explore All',
     all: 'All',
     subtitle: 'The full catalog — styles for every day, every season.',
+    search: 'Search products',
+    searchPlaceholder: 'Search products…',
     sortBy: 'Sort by',
     recommended: 'Recommended',
     priceLow: 'Price: Low to High',
@@ -76,7 +98,13 @@ export default {
     name: 'Name (A–Z)',
     items: '{count} items',
     emptyTitle: 'No products yet',
-    emptyHint: 'Add some products in src/data/catalog.js',
+    emptyHint: 'The catalog is empty right now — check back soon.',
+    noResultsTitle: 'No matching products',
+    noResultsHint: 'Try a different search or another category.',
+    pagination: 'Pagination',
+    previousPage: 'Previous page',
+    nextPage: 'Next page',
+    goToPage: 'Go to page {page}',
   },
   category: {
     products: '{count} products',
@@ -89,22 +117,27 @@ export default {
     notFoundHint: 'It may have sold out or the link is broken.',
     browseShop: 'Browse the shop',
     home: 'Home',
-    reviews: '{rating} · {count} reviews',
-    decreaseQty: 'Decrease quantity',
-    increaseQty: 'Increase quantity',
-    addToCart: 'Add to Cart',
-    addedToCart: '{name} added to cart',
-    addedToCartWithSize: '{name} ({size}) added to cart',
+    price: '${price}',
+    noDescription: 'No description available for this product yet.',
+    viewImage: 'View image {n}',
+    viewAll: 'View all',
+    related: 'You might also like',
+    // ======= OPTIONS (size × color from product.variants) =======
     selectSize: 'Select size',
-    sizeHint: 'Pick a size to add it to your cart',
-    checkingStock: 'Checking stock…',
+    selectColor: 'Select color',
     inStock: 'In stock',
     outOfStock: 'Out of stock',
+    lowStock: 'Only {count} left in stock',
     stockUnavailable: 'Stock currently unavailable',
-    selectSizeFirst: 'Please pick a size first',
-    sizeOutOfStock: 'Size {size} is out of stock',
-    related: 'You might also like',
-    viewAll: 'View all',
+    selectOptionsFirst: 'Please pick a size and a color first',
+    variantUnavailable: 'That size and color combination is not available',
+    variantOutOfStock: 'That size and color is out of stock',
+    // ======= CART =======
+    addToCart: 'Add to Cart',
+    addedToCartWithVariant: '{name} ({size}, {color}) added to cart',
+    decreaseQty: 'Decrease quantity',
+    increaseQty: 'Increase quantity',
+    // ======= TRUST BADGES =======
     featureShipping: 'Free shipping on orders over $50',
     featureSecure: 'Secure checkout & easy returns',
     featureSustainable: 'Sustainably sourced fabric',
@@ -149,17 +182,14 @@ export default {
     signInLink: 'Sign in',
     welcomeAboard: 'Account created. Welcome aboard!',
     registrationFailed: 'Registration failed',
+    // Shown while the backend has no /auth/* routes (kept per AGENTS.md).
+    // TODO(api): delete once /auth/login + /auth/register exist.
+    notAvailable: 'Accounts are not available yet. Please check back soon.',
   },
   notFound: {
     title: 'Page not found',
     hint: "The page you're looking for doesn't exist or has been moved.",
     backToHome: 'Back to Home',
-  },
-  testCard: {
-    newArrivals: 'New Arrivals',
-    title: 'Classic White Tee',
-    description: 'A light black, a pretty purple, and a clean white.',
-    freeShipping: 'Free shipping on orders',
   },
   about: {
     title: 'About',

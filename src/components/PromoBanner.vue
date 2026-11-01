@@ -2,40 +2,15 @@
 import { computed, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { pickByLocale } from '../i18n';
-import SectionHeaderSkeleton from './skeletons/SectionHeaderSkeleton.vue';
-import SkeletonBlock from './skeletons/SkeletonBlock.vue';
+import { promo } from '../data/site';
 
 // ======= PROMO SPLIT-BANNER + COUNTDOWN (home) =======
-// Full-width split: image + headline + live countdown to promo.ends_at.
-// SOURCE (swap point): `promo` below is placeholder data. When the backend is
-// up, fetch GET /api/home -> promo (see apis.md) and replace this object.
-// Content is locale-keyed: { en: {...}, ar: {...} } — picked by active locale.
+// EDITORIAL content: the API has no promo endpoint yet, so the campaign lives in
+// src/data/site.js -> promo (fully translated). `ends_at` drives the live
+// countdown and the local date format is ISO, so no server clock is needed.
+// TODO(api): swap for GET /home -> data.promo when it ships.
 const { t } = useI18n();
 
-// ======= LOADING STATE =======
-// Sync today; flip `loading` true when `promo` is fetched from the API
-// (GET /api/home -> promo, apis.md) so the skeleton shows first.
-const loading = ref(false);
-
-const promo = {
-  image:
-    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600',
-  ends_at: '2026-12-31T23:59:59',
-  en: {
-    title: 'Mid-Season Sale',
-    subtitle: 'Seasonal favorites at unbeatable prices.',
-    discount: 'UP TO 50% OFF',
-    cta: { label: 'Shop the sale', url: '/shop' },
-  },
-  ar: {
-    title: 'تخفيضات منتصف الموسم',
-    subtitle: 'مفضلات موسمية بأسعار لا تُقاوم.',
-    discount: 'خصم حتى 50%',
-    cta: { label: 'تسوق العرض', url: '/shop' },
-  },
-};
-
-// ======= COUNTDOWN TIMER =======
 const now = ref(Date.now());
 const timer = setInterval(() => {
   now.value = Date.now();
@@ -56,25 +31,14 @@ const units = computed(() => {
 </script>
 
 <template>
-  <!-- ======= PROMO BANNER ======= -->
+  <!-- ======= PROMO BANNER + COUNTDOWN =======
+       Edit the campaign text/dates/images in src/data/site.js -> promo.
+       CTA URL comes from promo.<locale>.cta.url (currently /shop). -->
   <section class="relative overflow-hidden">
-    <template v-if="loading">
-      <SkeletonBlock class="absolute inset-0 h-full w-full" />
-      <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 py-20 text-center text-white sm:px-6 lg:px-8 md:py-24">
-        <SectionHeaderSkeleton center class="mx-auto" />
-        <SkeletonBlock class="mt-4 h-4 w-2/3 max-w-sm" />
-        <div class="flex gap-3 sm:gap-4">
-          <SkeletonBlock v-for="n in 4" :key="n" class="h-20 w-16 rounded-xl" />
-        </div>
-        <SkeletonBlock class="h-11 w-44" />
-      </div>
-    </template>
+    <img :src="promo.image" :alt="pickByLocale(promo).title" class="absolute inset-0 h-full w-full object-cover" />
+    <div class="absolute inset-0 bg-ink-950/65"></div>
 
-    <template v-else>
-      <img :src="promo.image" :alt="pickByLocale(promo).title" class="absolute inset-0 h-full w-full object-cover" />
-      <div class="absolute inset-0 bg-ink-950/65"></div>
-
-      <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 py-20 text-center text-white sm:px-6 lg:px-8 md:py-24" data-aos="fade-up">
+    <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 py-20 text-center text-white sm:px-6 lg:px-8 md:py-24" data-aos="fade-up">
       <p class="rounded-full bg-primary-600 px-4 py-1.5 text-sm font-semibold uppercase tracking-wide">
         {{ pickByLocale(promo).title }}
       </p>
@@ -96,7 +60,6 @@ const units = computed(() => {
         {{ pickByLocale(promo).cta.label }}
         <i class="pi pi-arrow-right rtl:rotate-180" aria-hidden="true"></i>
       </RouterLink>
-      </div>
-      </template>
+    </div>
   </section>
 </template>

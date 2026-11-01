@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useCartStore } from '../stores/cart';
 import { useToastStore } from '../stores/toast';
 import { useLocaleStore } from '../stores/locale';
-import { getHomeData } from '../api/home';
+import { useCatalogStore } from '../stores/catalog';
+import { categoryEyebrow } from '../data/site';
 import LocaleSwitcher from './LocaleSwitcher.vue';
 import SkeletonBlock from './skeletons/SkeletonBlock.vue';
 
@@ -16,6 +17,7 @@ const route = useRoute();
 const cart = useCartStore();
 const toast = useToastStore();
 const localeStore = useLocaleStore();
+const catalog = useCatalogStore();
 
 // ======= MOBILE MENU LINKS =======
 // Static links for the hamburger menu on small screens. Category links are NOT
@@ -25,33 +27,22 @@ const mobileLinks = [
   { to: '/', labelKey: 'nav.home' },
   { to: '/shop', labelKey: 'nav.shop' },
   { to: '/about', labelKey: 'nav.about' },
-  { to: '/testcard', labelKey: 'nav.testCard' },
 ];
 
 // ======= DYNAMIC CATEGORY LINKS (hamburger menu) =======
-// Categories come from the backend (GET /api/home -> data.categories, see
-// src/api/home.js + apis.md). Fake data is served for now; swap src/api/home.js
-// for the real client when the Laravel API is up — no changes needed here.
-// The fetch is locale-aware (getHomeData(locale)) and re-runs on locale change.
-const categories = ref([]);
-const isCategoriesLoading = ref(true);
+// Categories come from the shared catalog store (GET /categories?lang=...).
+// The store is cached per locale and shared with Home/Shop, so this costs one
+// request for the whole app. Re-fetched when the language changes.
+const categories = computed(() => catalog.categories);
+const isCategoriesLoading = computed(() => catalog.loading && !catalog.hasData);
 
-const loadCategories = async () => {
-  isCategoriesLoading.value = true;
-  try {
-    const { data } = await getHomeData(localeStore.locale);
-    categories.value = data.categories;
-  } catch {
-    categories.value = []; // menu still works if the call fails
-  } finally {
-    isCategoriesLoading.value = false;
-  }
-};
+onMounted(() => catalog.load());
 
-onMounted(loadCategories);
-
-// Re-fetch categories when the locale changes (backend-tier content).
-watch(() => localeStore.locale, loadCategories);
+// Re-fetch when the locale changes: titles/descriptions are localized by the API.
+watch(
+  () => localeStore.locale,
+  () => catalog.load({ force: true }),
+);
 
 // Close the mobile menu + cart panel on every route change.
 watch(
@@ -71,8 +62,16 @@ const setQty = (item, delta) => {
   cart.setQty(item, item.qty + delta);
 };
 
+// Checkout is a must-do feature but cannot run while the shop is unreachable
+// (server-side stock/price check). Keep the button, explain the outage.
+const isShopUnavailable = computed(() => Boolean(catalog.error));
+
 const checkout = () => {
   isCartOpen.value = false;
+  if (isShopUnavailable.value) {
+    toast.error(t('nav.checkoutUnavailable'));
+    return;
+  }
   toast.info(t('nav.checkoutSoon'));
 };
 </script>
@@ -131,15 +130,6 @@ const checkout = () => {
                   active-class="text-primary-600 font-semibold"
                 >
                   {{ t('nav.about') }}
-                </RouterLink>
-              </li>
-              <li>
-                <RouterLink
-                  to="/testcard"
-                  class="text-ink-500 transition hover:text-ink-700"
-                  active-class="text-primary-600 font-semibold"
-                >
-                  {{ t('nav.testCard') }}
                 </RouterLink>
               </li>
             </ul>
@@ -224,7 +214,7 @@ const checkout = () => {
                   <!-- ======= CART LINE =======
                        Cart lines are keyed by id+size (see src/stores/cart.js).
                        Add the chosen size badge to the line so size isn't lost. -->
-                  <li v-for="item in cart.items" :key="`${item.id}__${item.size}`" class="flex gap-3 p-3">
+                  <li v-for="item in cart.items" :key="item.variantId" class="flex gap-3 p-3">
                     <img :src="item.image" :alt="item.name" class="h-16 w-12 shrink-0 rounded-lg object-cover" />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-start justify-between gap-2">
@@ -238,8 +228,19 @@ const checkout = () => {
                           <i class="pi pi-times text-xs" aria-hidden="true"></i>
                         </button>
                       </div>
-                      <p v-if="item.size" class="mt-1 text-[11px] font-medium text-ink-500">
-                        {{ t('nav.size') }}: <span class="font-semibold text-primary-600">{{ item.size }}</span>
+                      <p v-if="item.size" class="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-ink-500">
+                        <span>{{ t('nav.size') }}:</span>
+                        <span class="font-semibold text-primary-600">{{ item.size }}</span>
+                        <template v-if="item.color">
+                          <span class="text-ink-300">·</span>
+                          <span
+                            v-if="item.colorHex"
+                            class="h-2.5 w-2.5 rounded-full ring-1 ring-ink-200"
+                            :style="{ backgroundColor: item.colorHex }"
+                            aria-hidden="true"
+                          ></span>
+                          <span>{{ item.color }}</span>
+                        </template>
                       </p>
                       <p class="mt-0.5 text-xs font-semibold text-primary-600">
                         ${{ (item.price * item.qty).toFixed(2) }}
@@ -326,10 +327,9 @@ const checkout = () => {
           </RouterLink>
 
           <!-- ======= DYNAMIC CATEGORY LINKS =======
-               Rendered from `categories` ref populated on mount via
-               src/api/home.js (fake backend data today). Remove the divider +
-               heading if the menu feels busy, or keep them to separate pages
-               from shop categories. -->
+               Rendered from `categories` (shared catalog store -> GET /categories).
+               The small right-side line is the editorial eyebrow from
+               src/data/site.js -> categoryEyebrow(slug). -->
           <div class="mt-2 border-t border-ink-100 pt-3">
             <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-ink-400">{{ t('nav.categories') }}</p>
             <div
@@ -346,7 +346,7 @@ const checkout = () => {
             <RouterLink
               v-for="cat in categories"
               :key="cat.slug"
-              :to="cat.url"
+              :to="`/category/${cat.slug}`"
               class="block rounded-md px-3 py-2.5 text-sm font-medium text-ink-500 transition hover:bg-primary-50 hover:text-primary-600"
               active-class="bg-primary-50 text-primary-600 font-semibold"
               exact-active-class="bg-primary-50 text-primary-600 font-semibold"
@@ -354,7 +354,7 @@ const checkout = () => {
             >
               <span class="flex items-center justify-between">
                 <span>{{ cat.title }}</span>
-                <span class="text-xs text-ink-400">{{ cat.eyebrow }}</span>
+                <span class="text-xs text-ink-400">{{ categoryEyebrow(cat.slug) }}</span>
               </span>
             </RouterLink>
           </div>

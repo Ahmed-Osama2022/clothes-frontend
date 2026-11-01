@@ -1,30 +1,25 @@
 <script setup>
-import { ref } from 'vue';
-import { products } from '../data/catalog';
+import { computed } from 'vue';
+import { useCatalogStore } from '../stores/catalog';
 import ProductCard from './ProductCard.vue';
-import { useRouter } from 'vue-router';
 import SectionHeaderSkeleton from './skeletons/SectionHeaderSkeleton.vue';
 import ProductCardSkeleton from './skeletons/ProductCardSkeleton.vue';
 
 // ======= BEST SELLERS (home) =======
-// Grid of top products, each with a 'Best Seller' badge.
-// SOURCE (swap point): currently filtered from the `best-sellers` category in
-// src/data/catalog.js. When the backend is up, replace with data from
-// GET /api/home -> best_sellers[] (see apis.md for the exact shape).
-// The `badge` prop is UI chrome -> translated via i18n (bestSellers.badge).
-const router = useRouter();
+// Data: stores/catalog.js -> products where the API marks `isFeatured: true`
+// (GET /products seeds three featured items). No extra request: the catalog is
+// already loaded/shared by HomeView + Navbar.
+const catalog = useCatalogStore();
 
-// ======= LOADING STATE =======
-// Sync today; flip `loading` true when this fetches GET /api/home (see apis.md)
-// so the header + card skeletons show first.
-const loading = ref(false);
-
-const bestSellers = products.filter((p) => p.category === 'best-sellers').slice(0, 4);
+const loading = computed(() => catalog.loading && !catalog.hasData);
+const bestSellers = computed(() => catalog.featuredProducts.slice(0, 4));
 </script>
 
 <template>
-  <section class="mt-8">
-    <!-- ======= SECTION HEADER ======= -->
+  <!-- ======= BEST SELLERS =======
+       Section is hidden when the API returns no featured products (no fake
+       fill-in). Skeletons mirror the real 4-card grid while loading. -->
+  <section v-if="loading || bestSellers.length" class="mt-8">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex items-end justify-between">
         <SectionHeaderSkeleton v-if="loading" />
@@ -44,8 +39,6 @@ const bestSellers = products.filter((p) => p.category === 'best-sellers').slice(
       </div>
     </div>
 
-    <!-- ======= PRODUCT GRID =======
-         Card skeletons swap in while `loading` (no data-aos on transient grid). -->
     <div class="mx-auto mt-8 max-w-7xl px-4 pb-16 sm:px-6 lg:px-8" data-aos="fade-up">
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <template v-if="loading">

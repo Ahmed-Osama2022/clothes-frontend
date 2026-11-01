@@ -47,13 +47,13 @@ const handleSubmit = async () => {
 
   submitting.value = true;
   try {
-    // Backend not running yet — this will resolve as soon as the Laravel API
-    // answers on the host from .env (see src/api/client.js).
+    // TODO(api): the MVP backend has no /auth/login yet, so this rejects with a
+    // 404 and the UI shows `auth.notAvailable` instead of a raw network error.
     await auth.login({ email: email.value, password: password.value });
     toast.success(t('auth.welcomeBackToast', { name: auth.userName || ' ' }));
     router.push('/');
   } catch (error) {
-    toast.error(error.message || t('auth.loginFailed'));
+    toast.error(error.status === 404 ? t('auth.notAvailable') : error.message || t('auth.loginFailed'));
   } finally {
     submitting.value = false;
   }

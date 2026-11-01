@@ -1,17 +1,37 @@
 // ======= ARABIC MESSAGES (RTL locale) =======
-// UI chrome lives here (frontend tier). DATA content (categories, products,
-// promo, testimonials, hero slides) is locale-keyed in src/data/*.js and served
-// like a backend would (apis.md).
+// UI chrome lives here (frontend tier). Catalog content (categories, products,
+// variants) comes from the Laravel API already localized via `?lang=ar`.
+// Editorial content (hero, promo, testimonials) lives in src/data/site.js.
 export default {
   brand: 'محل ملابس',
   lang: { en: 'English', ar: 'العربية' },
   toast: { dismiss: 'إغلاق الإشعار' },
   loading: { placeholder: 'جارٍ تحميل المحتوى…' },
+  // ======= SHARED STATES (errors, retry, empty filters) =======
+  common: {
+    errorTitle: 'حدث خطأ ما',
+    errorHint: 'تعذّر تحميل هذا المحتوى. تحقّق من اتصالك وحاول مرة أخرى.',
+    retry: 'حاول مرة أخرى',
+    clearFilters: 'مسح الفلاتر',
+    // ======= DEGRADED MODE (backend unreachable, never fake data) =======
+    offlineTitle: 'المتجر غير متاح مؤقتًا',
+    offlineHint: 'تعذّر الوصول إلى المتجر الآن. تحقّق من اتصالك — سنعيد المحاولة تلقائيًا.',
+    retryingIn: 'إعادة المحاولة خلال {seconds} ثانية',
+    staleTitle: 'يتم عرض بيانات محفوظة.',
+    staleNotice: 'المتجر غير متصل، لذا قد تكون الأسعار والمخزون غير محدّثة.',
+  },
+  // ======= NETWORK / API ERRORS (src/api/client.js) =======
+  errors: {
+    network: 'خطأ في الشبكة — يرجى التحقق من اتصالك.',
+    timeout: 'استغرق الطلب وقتًا طويلًا. يرجى المحاولة مرة أخرى.',
+    server: 'يواجه الخادم مشكلة. يرجى المحاولة بعد قليل.',
+    generic: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
+    notFound: 'تعذّر العثور على ما تبحث عنه.',
+  },
   nav: {
     home: 'الرئيسية',
     shop: 'المتجر',
     about: 'من نحن',
-    testCard: 'بطاقة تجريبية',
     login: 'تسجيل الدخول',
     register: 'إنشاء حساب',
     openCart: 'افتح السلة',
@@ -27,8 +47,8 @@ export default {
     size: 'المقاس',
     checkout: 'إتمام الشراء',
     categories: 'التصنيفات',
-    loadingCategories: 'جارٍ تحميل التصنيفات…',
     checkoutSoon: 'إتمام الشراء قريبًا',
+    checkoutUnavailable: 'إتمام الشراء غير متاح أثناء انقطاع المتجر.',
   },
   announcement: {
     freeShipping: 'شحن مجاني للطلبات فوق $50',
@@ -69,6 +89,8 @@ export default {
     title: 'استكشف الكل',
     all: 'الكل',
     subtitle: 'الكتالوج الكامل — أزياء لكل يوم وكل موسم.',
+    search: 'ابحث عن منتج',
+    searchPlaceholder: 'ابحث عن منتج…',
     sortBy: 'ترتيب حسب',
     recommended: 'الموصى به',
     priceLow: 'السعر: من الأقل إلى الأعلى',
@@ -76,7 +98,13 @@ export default {
     name: 'الاسم (أ–ي)',
     items: '{count} منتجات',
     emptyTitle: 'لا توجد منتجات بعد',
-    emptyHint: 'أضف منتجات في ملف src/data/catalog.js',
+    emptyHint: 'الكتالوج فارغ حاليًا — عُد قريبًا.',
+    noResultsTitle: 'لا توجد منتجات مطابقة',
+    noResultsHint: 'جرّب بحثًا آخر أو تصنيفًا مختلفًا.',
+    pagination: 'ترقيم الصفحات',
+    previousPage: 'الصفحة السابقة',
+    nextPage: 'الصفحة التالية',
+    goToPage: 'الانتقال إلى الصفحة {page}',
   },
   category: {
     products: '{count} منتجات',
@@ -89,22 +117,27 @@ export default {
     notFoundHint: 'ربما نفد من المخزون أو أن الرابط غير صحيح.',
     browseShop: 'تصفح المتجر',
     home: 'الرئيسية',
-    reviews: '{rating} · {count} تقييم',
-    decreaseQty: 'إنقاص الكمية',
-    increaseQty: 'زيادة الكمية',
-    addToCart: 'أضف إلى السلة',
-    addedToCart: 'تمت إضافة {name} إلى السلة',
-    addedToCartWithSize: 'تمت إضافة {name} ({size}) إلى السلة',
+    price: '${price}',
+    noDescription: 'لا يوجد وصف لهذا المنتج بعد.',
+    viewImage: 'عرض الصورة {n}',
+    viewAll: 'عرض الكل',
+    related: 'قد يعجبك أيضًا',
+    // ======= OPTIONS (size × color from product.variants) =======
     selectSize: 'اختر المقاس',
-    sizeHint: 'اختر المقاس لإضافته إلى سلتك',
-    checkingStock: 'جارٍ التحقق من التوفر…',
+    selectColor: 'اختر اللون',
     inStock: 'متوفر',
     outOfStock: 'غير متوفر',
-    stockUnavailable: 'المخزون غير متاح حالياً',
-    selectSizeFirst: 'يرجى اختيار المقاس أولاً',
-    sizeOutOfStock: 'المقاس {size} غير متوفر',
-    related: 'قد يعجبك أيضًا',
-    viewAll: 'عرض الكل',
+    lowStock: 'بقيت {count} قطع فقط',
+    stockUnavailable: 'المخزون غير متاح حاليًا',
+    selectOptionsFirst: 'يرجى اختيار المقاس واللون أولًا',
+    variantUnavailable: 'هذا المقاس واللون غير متاحين',
+    variantOutOfStock: 'هذا المقاس واللون غير متوفرين',
+    // ======= CART =======
+    addToCart: 'أضف إلى السلة',
+    addedToCartWithVariant: 'تمت إضافة {name} ({size}، {color}) إلى السلة',
+    decreaseQty: 'إنقاص الكمية',
+    increaseQty: 'زيادة الكمية',
+    // ======= TRUST BADGES =======
     featureShipping: 'شحن مجاني للطلبات فوق $50',
     featureSecure: 'دفع آمن وإرجاع سهل',
     featureSustainable: 'أقمشة من مصادر مستدامة',
@@ -149,17 +182,14 @@ export default {
     signInLink: 'سجّل الدخول',
     welcomeAboard: 'تم إنشاء الحساب. أهلًا بك!',
     registrationFailed: 'فشل التسجيل',
+    // Shown while the backend has no /auth/* routes (kept per AGENTS.md).
+    // TODO(api): delete once /auth/login + /auth/register exist.
+    notAvailable: 'الحسابات غير متاحة بعد. يرجى المحاولة لاحقًا.',
   },
   notFound: {
     title: 'الصفحة غير موجودة',
     hint: 'الصفحة التي تبحث عنها غير موجودة أو تم نقلها.',
     backToHome: 'العودة للرئيسية',
-  },
-  testCard: {
-    newArrivals: 'وصل حديثًا',
-    title: 'تي شيرت أبيض كلاسيكي',
-    description: 'أسود فاتح، بنفسجي جميل، وأبيض نقي.',
-    freeShipping: 'شحن مجاني على الطلبات',
   },
   about: {
     title: 'من نحن',
