@@ -191,7 +191,19 @@ export default {
     hint: 'الصفحة التي تبحث عنها غير موجودة أو تم نقلها.',
     backToHome: 'العودة للرئيسية',
   },
+  // ======= ABOUT PAGE (UI chrome only) =======
+  // The page copy (title, intro, blocks, stats, contact, social) comes from
+  // GET /about — these keys are only labels around that API content.
   about: {
     title: 'من نحن',
+    eyebrow: 'من نحن',
+    contactTitle: 'بيانات التواصل',
+    contactCta: 'تواصل معنا',
+    followUs: 'تابعنا',
+    updated: 'آخر تحديث {date}',
+    // Degraded mode / missing page
+    staleNotice: 'هذه الصفحة محفوظة من زيارتك الأخيرة وقد تكون غير محدّثة.',
+    notAvailable: 'هذه الصفحة غير متاحة حاليًا.',
+    notAvailableHint: 'يرجى المحاولة لاحقًا أو متابعة التسوق.',
   },
 }

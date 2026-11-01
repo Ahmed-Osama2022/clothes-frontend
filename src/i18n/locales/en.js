@@ -191,7 +191,19 @@ export default {
     hint: "The page you're looking for doesn't exist or has been moved.",
     backToHome: 'Back to Home',
   },
+  // ======= ABOUT PAGE (UI chrome only) =======
+  // The page copy (title, intro, blocks, stats, contact, social) comes from
+  // GET /about — these keys are only labels around that API content.
   about: {
     title: 'About',
+    eyebrow: 'About us',
+    contactTitle: 'Contact details',
+    contactCta: 'Get in touch',
+    followUs: 'Follow us',
+    updated: 'Last updated {date}',
+    // Degraded mode / missing page
+    staleNotice: 'This page is saved from your last visit and may be out of date.',
+    notAvailable: 'This page is not available right now.',
+    notAvailableHint: 'Please check back later, or continue shopping.',
   },
 }
