@@ -147,7 +147,8 @@ export default {
     signInPrompt: 'Sign in to your account',
     email: 'Email',
     password: 'Password',
-    emailPlaceholder: 'you@example.com',
+    // Escaped '@' — vue-i18n reads a bare '@' as a linked-message token.
+    emailPlaceholder: "you{'@'}example.com",
     emailRequired: 'Email is required',
     emailInvalid: 'Enter a valid email address',
     passwordRequired: 'Password is required',
@@ -185,6 +186,11 @@ export default {
     // Shown while the backend has no /auth/* routes (kept per AGENTS.md).
     // TODO(api): delete once /auth/login + /auth/register exist.
     notAvailable: 'Accounts are not available yet. Please check back soon.',
+    // ======= "COMING SOON" PAGE NOTICES =======
+    // Banner at the top of each auth form while the auth API is missing.
+    // TODO(api): remove with the banners once /auth/login + /auth/register ship.
+    loginComingSoon: 'Login page is coming soon.',
+    registerComingSoon: 'Register page is coming soon.',
   },
   notFound: {
     title: 'Page not found',

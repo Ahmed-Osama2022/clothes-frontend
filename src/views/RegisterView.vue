@@ -103,7 +103,19 @@ const handleSubmit = async () => {
           </div>
         </div>
 
-        <form class="mt-8 space-y-5" novalidate @submit.prevent="handleSubmit">
+        <!-- ======= COMING SOON NOTICE =======
+             Accounts are not live yet (TODO(api): POST /auth/register). The form
+             stays visible so the design is reviewable, but the user is told up
+             front instead of after submitting. Remove with `auth.registerComingSoon`. -->
+        <p
+          role="status"
+          class="mt-6 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800"
+        >
+          <i class="pi pi-info-circle mt-0.5 text-sm" aria-hidden="true"></i>
+          <span>{{ $t('auth.registerComingSoon') }}</span>
+        </p>
+
+        <form class="mt-6 space-y-5" novalidate @submit.prevent="handleSubmit">
           <!-- ======= FULL NAME ======= -->
           <div>
             <label for="reg-name" class="mb-1.5 block text-sm font-medium text-ink-700">{{ $t('auth.fullName') }}</label>

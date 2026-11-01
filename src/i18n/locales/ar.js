@@ -147,7 +147,8 @@ export default {
     signInPrompt: 'سجّل الدخول إلى حسابك',
     email: 'البريد الإلكتروني',
     password: 'كلمة المرور',
-    emailPlaceholder: 'you@example.com',
+    // Escaped '@' — vue-i18n reads a bare '@' as a linked-message token.
+    emailPlaceholder: "you{'@'}example.com",
     emailRequired: 'البريد الإلكتروني مطلوب',
     emailInvalid: 'أدخل بريدًا إلكترونيًا صحيحًا',
     passwordRequired: 'كلمة المرور مطلوبة',
@@ -185,6 +186,11 @@ export default {
     // Shown while the backend has no /auth/* routes (kept per AGENTS.md).
     // TODO(api): delete once /auth/login + /auth/register exist.
     notAvailable: 'الحسابات غير متاحة بعد. يرجى المحاولة لاحقًا.',
+    // ======= "COMING SOON" PAGE NOTICES =======
+    // Banner at the top of each auth form while the auth API is missing.
+    // TODO(api): remove with the banners once /auth/login + /auth/register ship.
+    loginComingSoon: 'صفحة تسجيل الدخول قادمة قريبًا.',
+    registerComingSoon: 'صفحة إنشاء الحساب قادمة قريبًا.',
   },
   notFound: {
     title: 'الصفحة غير موجودة',
